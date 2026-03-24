@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import ArticleCard from '../components/ArticleCard';
 import useArticles from '../hooks/useArticles';
 import './Home.css';
@@ -6,10 +7,39 @@ import './Home.css';
 const categories = ['All', 'Knowledge', 'Paper', 'Code'];
 
 export default function Home() {
-  const { getGroupedByYear } = useArticles();
+  const { articles, getGroupedByYear } = useArticles();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeCategory, setActiveCategory] = useState('All');
 
-  const groupedArticles = getGroupedByYear(activeCategory);
+  const activeTag = searchParams.get('tag') || null;
+
+  // Get all unique tags from articles
+  const allTags = [...new Set(
+    articles.flatMap(a => Array.isArray(a.tags) ? a.tags : [])
+  )].sort();
+
+  // Filter: category first, then tag
+  let groupedArticles = getGroupedByYear(activeCategory);
+
+  if (activeTag) {
+    groupedArticles = groupedArticles
+      .map(group => ({
+        ...group,
+        articles: group.articles.filter(a =>
+          Array.isArray(a.tags) && a.tags.some(t => t.toLowerCase() === activeTag.toLowerCase())
+        ),
+      }))
+      .filter(group => group.articles.length > 0);
+  }
+
+  const clearTag = () => {
+    searchParams.delete('tag');
+    setSearchParams(searchParams);
+  };
+
+  const selectTag = (tag) => {
+    setSearchParams({ tag });
+  };
 
   return (
     <div className="home">
@@ -25,12 +55,32 @@ export default function Home() {
           <button
             key={cat}
             className={`home__filter ${activeCategory === cat ? 'home__filter--active' : ''}`}
-            onClick={() => setActiveCategory(cat)}
+            onClick={() => { setActiveCategory(cat); clearTag(); }}
           >
             {cat}
           </button>
         ))}
       </div>
+
+      {/* Tag filter chips */}
+      {allTags.length > 0 && (
+        <div className="home__tags">
+          {activeTag && (
+            <button className="home__tag home__tag--clear" onClick={clearTag}>
+              ✕ Clear
+            </button>
+          )}
+          {allTags.map(tag => (
+            <button
+              key={tag}
+              className={`home__tag ${activeTag === tag ? 'home__tag--active' : ''}`}
+              onClick={() => selectTag(tag)}
+            >
+              #{tag}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="home__articles">
         {groupedArticles.map(({ year, articles }) => (

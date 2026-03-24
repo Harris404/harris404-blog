@@ -48,6 +48,47 @@
   background: var(--accent-light);
 }
 
+/* --- Tag chips --- */
+.home__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+
+.home__tag {
+  padding: 3px 10px;
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.home__tag:hover {
+  background: var(--accent-light);
+}
+
+.home__tag--active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.home__tag--clear {
+  color: var(--text-muted);
+  border-color: var(--border-color);
+}
+
+.home__tag--clear:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+  background: transparent;
+}
+
 /* --- Article Groups --- */
 .article-group {
   margin-bottom: 24px;

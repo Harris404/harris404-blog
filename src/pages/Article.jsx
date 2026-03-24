@@ -118,7 +118,9 @@ export default function Article() {
             {article.tags && (
               <div className="article-tags">
                 {(Array.isArray(article.tags) ? article.tags : []).map(tag => (
-                  <span key={tag} className="article-tag">#{tag}</span>
+                  <Link key={tag} to={`/?tag=${encodeURIComponent(tag)}`} className="article-tag">
+                    #{tag}
+                  </Link>
                 ))}
               </div>
             )}

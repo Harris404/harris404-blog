@@ -122,6 +122,13 @@
 .article-tag {
   font-size: 0.78rem;
   color: var(--accent);
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.article-tag:hover {
+  opacity: 0.7;
 }
 
 /* --- TOC --- */
