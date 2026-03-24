@@ -1,0 +1,47 @@
+-- D1 Database Schema for Blog Articles
+CREATE TABLE IF NOT EXISTS articles (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  date TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT 'LLM',
+  tags TEXT DEFAULT '[]',
+  summary TEXT DEFAULT '',
+  content TEXT NOT NULL,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+-- Seed with sample articles
+INSERT OR IGNORE INTO articles (id, title, date, category, tags, summary, content) VALUES
+('understanding-transformer-architecture', 'Understanding the Transformer Architecture: A Deep Dive', '2026-03-20', 'LLM', '["Transformer","Attention","Deep Learning"]', 'A comprehensive walkthrough of the Transformer architecture, from self-attention mechanisms to positional encoding.', '# Understanding the Transformer Architecture
+
+The Transformer architecture, introduced in the seminal paper *"Attention Is All You Need"* (Vaswani et al., 2017), has revolutionized natural language processing and beyond.
+
+## Key Components
+
+### 1. Self-Attention Mechanism
+
+The self-attention mechanism allows each token in a sequence to attend to every other token.
+
+### 2. Multi-Head Attention
+
+```python
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model, num_heads):
+        super().__init__()
+        self.num_heads = num_heads
+        self.d_k = d_model // num_heads
+        self.W_q = nn.Linear(d_model, d_model)
+        self.W_k = nn.Linear(d_model, d_model)
+        self.W_v = nn.Linear(d_model, d_model)
+        self.W_o = nn.Linear(d_model, d_model)
+```
+
+## Why Transformers Work So Well
+
+| Aspect | RNN | Transformer |
+|--------|-----|-------------|
+| Parallelization | Sequential | Fully parallel |
+| Long-range deps | Vanishing gradients | Direct connections |
+| Scalability | Limited | Excellent |
+');

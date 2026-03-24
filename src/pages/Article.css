@@ -1,0 +1,138 @@
+.article-page {
+  padding: 40px 40px;
+  max-width: 920px;
+}
+
+.article-back {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  margin-bottom: 28px;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.article-back:hover {
+  color: var(--accent);
+}
+
+/* --- Layout --- */
+.article-layout {
+  display: flex;
+  gap: 48px;
+  align-items: flex-start;
+}
+
+.article-content {
+  flex: 1;
+  min-width: 0;
+  max-width: 660px;
+}
+
+/* --- Header --- */
+.article-header {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.article-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.article-meta__sep {
+  color: var(--border-color);
+}
+
+.article-category {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.7rem;
+}
+
+.article-category--llm { color: var(--tag-llm); }
+.article-category--paper { color: var(--tag-paper); }
+.article-category--code { color: var(--tag-code); }
+
+.article-title {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.article-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.article-tag {
+  font-size: 0.78rem;
+  color: var(--accent);
+}
+
+/* --- TOC --- */
+.toc {
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.toc__sticky {
+  position: sticky;
+  top: 40px;
+}
+
+.toc__title {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.toc__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.toc__link {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  padding: 3px 0;
+  padding-left: 10px;
+  border-left: 1.5px solid var(--border-color);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  line-height: 1.4;
+}
+
+.toc__link:hover {
+  color: var(--accent);
+  border-left-color: var(--accent);
+}
+
+.toc__link--h3 {
+  padding-left: 20px;
+  font-size: 0.74rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 900px) {
+  .toc { display: none; }
+  .article-page { padding: 24px 20px; }
+  .article-title { font-size: 1.6rem; }
+}

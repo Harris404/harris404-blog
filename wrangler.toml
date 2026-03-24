@@ -1,0 +1,9 @@
+name = "personal-blog"
+compatibility_date = "2024-12-01"
+
+# Cloudflare Pages will auto-detect the `functions/` directory
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "blog-articles"
+database_id = "" # Will be filled after creating the database
