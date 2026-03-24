@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import sampleArticles from '../data/articles';
 
 const API_BASE = '/api/articles';
@@ -6,17 +6,16 @@ const STORAGE_KEY = 'blog-articles';
 
 /**
  * Articles hook — tries API first, falls back to localStorage + sample data.
- * This allows the blog to work both locally (no backend) and on Cloudflare Pages (with D1).
  */
 export default function useArticles() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [useApi, setUseApi] = useState(true);
+  const useApiRef = useRef(true);
+  const articleCacheRef = useRef({});
 
-  // Load articles
+  // Load articles list
   useEffect(() => {
     async function load() {
-      // Try API first
       try {
         const res = await fetch(API_BASE);
         if (res.ok) {
@@ -28,11 +27,11 @@ export default function useArticles() {
           }
         }
       } catch {
-        // API not available, fall back
+        // API not available
       }
 
       // Fallback: localStorage + sample articles
-      setUseApi(false);
+      useApiRef.current = false;
       try {
         const stored = localStorage.getItem(STORAGE_KEY);
         const userArticles = stored ? JSON.parse(stored) : [];
@@ -57,7 +56,7 @@ export default function useArticles() {
       date: articleData.date || new Date().toISOString().split('T')[0],
     };
 
-    if (useApi) {
+    if (useApiRef.current) {
       try {
         const res = await fetch(API_BASE, {
           method: 'POST',
@@ -70,7 +69,7 @@ export default function useArticles() {
           return { ...newArticle, ...created };
         }
       } catch {
-        // fall through to localStorage
+        // fall through
       }
     }
 
@@ -83,10 +82,44 @@ export default function useArticles() {
       return updated;
     });
     return newArticle;
-  }, [useApi]);
+  }, []);
 
-  const getArticle = useCallback((id) => {
-    return articles.find(a => a.id === id);
+  // Get a single article — fetches full content from API if needed
+  const getArticle = useCallback(async (id) => {
+    // Check cache first
+    if (articleCacheRef.current[id]) {
+      return articleCacheRef.current[id];
+    }
+
+    // Check if we have it locally with content
+    const local = articles.find(a => a.id === id);
+    if (local && local.content) {
+      articleCacheRef.current[id] = local;
+      return local;
+    }
+
+    // Fetch from API
+    if (useApiRef.current) {
+      try {
+        const res = await fetch(`${API_BASE}/${id}`);
+        if (res.ok) {
+          const article = await res.json();
+          articleCacheRef.current[id] = article;
+          return article;
+        }
+      } catch {
+        // fall through
+      }
+    }
+
+    // Final fallback: check sample articles
+    const sample = sampleArticles.find(a => a.id === id);
+    if (sample) {
+      articleCacheRef.current[id] = sample;
+      return sample;
+    }
+
+    return null;
   }, [articles]);
 
   const getByCategory = useCallback((category) => {

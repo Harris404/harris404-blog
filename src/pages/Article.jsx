@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import useArticles from '../hooks/useArticles';
 import './Article.css';
@@ -26,7 +26,22 @@ function estimateReadingTime(content) {
 export default function Article() {
   const { id } = useParams();
   const { getArticle } = useArticles();
-  const article = getArticle(id);
+  const [article, setArticle] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      const result = await getArticle(id);
+      if (!cancelled) {
+        setArticle(result);
+        setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [id, getArticle]);
 
   const headings = useMemo(
     () => article ? extractHeadings(article.content) : [],
@@ -37,6 +52,14 @@ export default function Article() {
     () => article ? estimateReadingTime(article.content) : 0,
     [article]
   );
+
+  if (loading) {
+    return (
+      <div className="article-page">
+        <p className="article-loading">Loading...</p>
+      </div>
+    );
+  }
 
   if (!article) {
     return (
@@ -72,7 +95,7 @@ export default function Article() {
             <h1 className="article-title">{article.title}</h1>
             {article.tags && (
               <div className="article-tags">
-                {article.tags.map(tag => (
+                {(Array.isArray(article.tags) ? article.tags : []).map(tag => (
                   <span key={tag} className="article-tag">#{tag}</span>
                 ))}
               </div>
