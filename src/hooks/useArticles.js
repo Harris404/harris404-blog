@@ -94,8 +94,6 @@ export default function useArticles() {
         console.error('Delete error:', err);
       }
     }
-    // Clear from cache
-    delete articleCacheRef.current[id];
     setArticles(prev => prev.filter(a => a.id !== id));
     // Also remove from localStorage
     try {
