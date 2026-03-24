@@ -7,3 +7,8 @@ pages_build_output_dir = "dist"
 binding = "DB"
 database_name = "blog-articles"
 database_id = "fb1643fa-8b3e-4876-abf0-0df79b838dc2"
+
+# R2 Storage for uploaded images
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "blog-images"

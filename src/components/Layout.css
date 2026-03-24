@@ -170,6 +170,10 @@
    Responsive
    ======================================== */
 @media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+
   .sidebar {
     transform: translateX(-100%);
     transition: transform var(--transition-base);
@@ -194,7 +198,7 @@
   .mobile-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 12px;
     padding: 12px 16px;
     border-bottom: 1px solid var(--border-color);
     background: var(--bg-primary);
@@ -214,6 +218,10 @@
     font-weight: 600;
     color: var(--text-primary);
     text-decoration: none;
+  }
+
+  .mobile-header > :last-child {
+    margin-left: auto;
   }
 
   .sidebar__footer {
