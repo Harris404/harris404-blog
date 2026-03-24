@@ -16,7 +16,9 @@ export default function useArticles() {
         const res = await fetch(API_BASE);
         if (res.ok) {
           const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
+          if (Array.isArray(data)) {
+            // API is working — use it as the source of truth
+            useApiRef.current = true;
             setArticles(data);
             setLoading(false);
             return;
@@ -81,14 +83,19 @@ export default function useArticles() {
   const deleteArticle = useCallback(async (id, token) => {
     if (useApiRef.current) {
       try {
-        await fetch(`${API_BASE}/${id}`, {
+        const res = await fetch(`${API_BASE}/${id}`, {
           method: 'DELETE',
           headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         });
-      } catch {
-        // fall through
+        if (!res.ok) {
+          console.error('Delete failed:', await res.text());
+        }
+      } catch (err) {
+        console.error('Delete error:', err);
       }
     }
+    // Clear from cache
+    delete articleCacheRef.current[id];
     setArticles(prev => prev.filter(a => a.id !== id));
     // Also remove from localStorage
     try {
