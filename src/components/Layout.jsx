@@ -46,7 +46,13 @@ export default function Layout({ children }) {
       <aside className={`sidebar ${sidebarOpen ? 'sidebar--open' : ''}`}>
         <div className="sidebar__inner">
           <div className="sidebar__profile">
-            <div className="sidebar__avatar">P</div>
+            <div
+              className={`sidebar__avatar ${!isAdmin ? 'sidebar__avatar--clickable' : ''}`}
+              onClick={() => { if (!isAdmin) navigate('/login'); }}
+              title={!isAdmin ? 'Admin login' : ''}
+            >
+              P
+            </div>
             <h2 className="sidebar__name">Paris</h2>
             <p className="sidebar__bio">
               Exploring deep learning, paper analysis, and code. Learning by writing.

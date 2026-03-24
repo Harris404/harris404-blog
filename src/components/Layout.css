@@ -47,6 +47,15 @@
   margin-bottom: 14px;
 }
 
+.sidebar__avatar--clickable {
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.sidebar__avatar--clickable:hover {
+  transform: scale(1.08);
+}
+
 .sidebar__name {
   font-family: var(--font-serif);
   font-size: 1.15rem;
