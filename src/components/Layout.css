@@ -110,6 +110,20 @@
   padding-top: 16px;
   border-top: 1px solid var(--border-color);
   margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar__logout {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.sidebar__logout:hover {
+  color: var(--accent);
 }
 
 /* --- Main Content --- */

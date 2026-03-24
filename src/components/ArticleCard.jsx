@@ -19,7 +19,7 @@ export default function ArticleCard({ article, index }) {
       <div className="article-card__content">
         <h3 className="article-card__title">{article.title}</h3>
         <div className="article-card__meta">
-          <span className="article-card__author">Harris</span>
+          <span className="article-card__author">Paris</span>
           <span className="article-card__sep">·</span>
           <span className="article-card__date">{formattedDate}</span>
           <span className="article-card__sep">·</span>

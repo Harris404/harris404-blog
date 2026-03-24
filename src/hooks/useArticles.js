@@ -4,16 +4,12 @@ import sampleArticles from '../data/articles';
 const API_BASE = '/api/articles';
 const STORAGE_KEY = 'blog-articles';
 
-/**
- * Articles hook — tries API first, falls back to localStorage + sample data.
- */
 export default function useArticles() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const useApiRef = useRef(true);
   const articleCacheRef = useRef({});
 
-  // Load articles list
   useEffect(() => {
     async function load() {
       try {
@@ -30,16 +26,12 @@ export default function useArticles() {
         // API not available
       }
 
-      // Fallback: localStorage + sample articles
       useApiRef.current = false;
       try {
         const stored = localStorage.getItem(STORAGE_KEY);
         const userArticles = stored ? JSON.parse(stored) : [];
         const userIds = new Set(userArticles.map(a => a.id));
-        const combined = [
-          ...userArticles,
-          ...sampleArticles.filter(a => !userIds.has(a.id))
-        ];
+        const combined = [...userArticles, ...sampleArticles.filter(a => !userIds.has(a.id))];
         setArticles(combined);
       } catch {
         setArticles(sampleArticles);
@@ -49,7 +41,7 @@ export default function useArticles() {
     load();
   }, []);
 
-  const addArticle = useCallback(async (articleData) => {
+  const addArticle = useCallback(async (articleData, token) => {
     const newArticle = {
       ...articleData,
       id: articleData.id || articleData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
@@ -60,7 +52,10 @@ export default function useArticles() {
       try {
         const res = await fetch(API_BASE, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+          },
           body: JSON.stringify(newArticle),
         });
         if (res.ok) {
@@ -73,7 +68,6 @@ export default function useArticles() {
       }
     }
 
-    // localStorage fallback
     setArticles(prev => {
       const updated = [newArticle, ...prev];
       const sampleIds = new Set(sampleArticles.map(a => a.id));
@@ -84,21 +78,37 @@ export default function useArticles() {
     return newArticle;
   }, []);
 
-  // Get a single article — fetches full content from API if needed
-  const getArticle = useCallback(async (id) => {
-    // Check cache first
-    if (articleCacheRef.current[id]) {
-      return articleCacheRef.current[id];
+  const deleteArticle = useCallback(async (id, token) => {
+    if (useApiRef.current) {
+      try {
+        await fetch(`${API_BASE}/${id}`, {
+          method: 'DELETE',
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        });
+      } catch {
+        // fall through
+      }
     }
+    setArticles(prev => prev.filter(a => a.id !== id));
+    // Also remove from localStorage
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const userArticles = JSON.parse(stored).filter(a => a.id !== id);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(userArticles));
+      }
+    } catch { /* ignore */ }
+  }, []);
 
-    // Check if we have it locally with content
+  const getArticle = useCallback(async (id) => {
+    if (articleCacheRef.current[id]) return articleCacheRef.current[id];
+
     const local = articles.find(a => a.id === id);
     if (local && local.content) {
       articleCacheRef.current[id] = local;
       return local;
     }
 
-    // Fetch from API
     if (useApiRef.current) {
       try {
         const res = await fetch(`${API_BASE}/${id}`);
@@ -107,18 +117,11 @@ export default function useArticles() {
           articleCacheRef.current[id] = article;
           return article;
         }
-      } catch {
-        // fall through
-      }
+      } catch { /* fall through */ }
     }
 
-    // Final fallback: check sample articles
     const sample = sampleArticles.find(a => a.id === id);
-    if (sample) {
-      articleCacheRef.current[id] = sample;
-      return sample;
-    }
-
+    if (sample) { articleCacheRef.current[id] = sample; return sample; }
     return null;
   }, [articles]);
 
@@ -143,5 +146,5 @@ export default function useArticles() {
       }));
   }, [getByCategory]);
 
-  return { articles, loading, addArticle, getArticle, getByCategory, getGroupedByYear };
+  return { articles, loading, addArticle, deleteArticle, getArticle, getByCategory, getGroupedByYear };
 }

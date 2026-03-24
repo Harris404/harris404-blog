@@ -1,7 +1,8 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useMemo, useState, useEffect } from 'react';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import useArticles from '../hooks/useArticles';
+import { useAuth } from '../hooks/useAuth';
 import './Article.css';
 
 function extractHeadings(markdown) {
@@ -25,7 +26,9 @@ function estimateReadingTime(content) {
 
 export default function Article() {
   const { id } = useParams();
-  const { getArticle } = useArticles();
+  const navigate = useNavigate();
+  const { getArticle, deleteArticle } = useArticles();
+  const { isAdmin, token } = useAuth();
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -53,6 +56,12 @@ export default function Article() {
     [article]
   );
 
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this article?')) return;
+    await deleteArticle(id, token);
+    navigate('/');
+  };
+
   if (loading) {
     return (
       <div className="article-page">
@@ -78,7 +87,12 @@ export default function Article() {
 
   return (
     <div className="article-page">
-      <Link to="/" className="article-back">← Back to articles</Link>
+      <div className="article-topbar">
+        <Link to="/" className="article-back">← Back to articles</Link>
+        {isAdmin && (
+          <button className="article-delete" onClick={handleDelete}>Delete</button>
+        )}
+      </div>
 
       <div className="article-layout">
         <article className="article-content">

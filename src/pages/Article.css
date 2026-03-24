@@ -1,6 +1,28 @@
 .article-page {
-  padding: 40px 40px;
-  max-width: 920px;
+  padding: 48px 40px;
+  max-width: 900px;
+}
+
+.article-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.article-delete {
+  font-size: 0.78rem;
+  color: #c0392b;
+  cursor: pointer;
+  padding: 4px 12px;
+  border: 1px solid #c0392b;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.article-delete:hover {
+  background: #c0392b;
+  color: white;
 }
 
 .article-back {

@@ -8,7 +8,7 @@ export default function About() {
 
         <div className="about-bio">
           <p>
-            Hi, I'm <strong>Harris</strong> — an AI researcher and developer passionate about 
+            Hi, I'm <strong>Paris</strong> — an AI researcher and developer passionate about 
             understanding and building with Large Language Models.
           </p>
           <p>

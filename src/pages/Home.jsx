@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <div className="home">
       <header className="home__header">
-        <h1 className="home__title">Harris's Thoughts</h1>
+        <h1 className="home__title">Paris's Thoughts</h1>
         <p className="home__desc">
           Notes on large language models, paper analyses, and code.
         </p>
