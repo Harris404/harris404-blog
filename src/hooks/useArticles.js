@@ -146,5 +146,32 @@ export default function useArticles() {
       }));
   }, [getByCategory]);
 
-  return { articles, loading, addArticle, deleteArticle, getArticle, getByCategory, getGroupedByYear };
+  const updateArticle = useCallback(async (id, articleData, token) => {
+    const updatedDate = articleData.date || new Date().toISOString().split('T')[0];
+
+    if (useApiRef.current) {
+      try {
+        await fetch(`${API_BASE}/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ ...articleData, date: updatedDate }),
+        });
+      } catch {
+        // fall through
+      }
+    }
+
+    // Clear cache so next fetch gets fresh data
+    delete articleCacheRef.current[id];
+
+    // Update local state
+    setArticles(prev => prev.map(a =>
+      a.id === id ? { ...a, ...articleData, date: updatedDate } : a
+    ));
+  }, []);
+
+  return { articles, loading, addArticle, updateArticle, deleteArticle, getArticle, getByCategory, getGroupedByYear };
 }

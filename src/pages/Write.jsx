@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import useArticles from '../hooks/useArticles';
 import { useAuth } from '../hooks/useAuth';
@@ -13,30 +13,49 @@ const CODE_LANGUAGES = [
   'html', 'css', 'json', 'yaml', 'markdown',
 ];
 
+const EMPTY_FORM = { title: '', category: 'Knowledge', tags: '', content: '' };
+
 function loadDraft() {
   try {
     const draft = localStorage.getItem(DRAFT_KEY);
-    return draft ? JSON.parse(draft) : { title: '', category: 'Knowledge', tags: '', content: '' };
+    return draft ? JSON.parse(draft) : { ...EMPTY_FORM };
   } catch {
-    return { title: '', category: 'Knowledge', tags: '', content: '' };
+    return { ...EMPTY_FORM };
   }
 }
 
 export default function Write() {
   const navigate = useNavigate();
-  const { addArticle } = useArticles();
+  const location = useLocation();
+  const { addArticle, updateArticle } = useArticles();
   const { token } = useAuth();
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
 
-  const [form, setForm] = useState(loadDraft);
+  // Check if we're in edit mode (article data passed via router state)
+  const editArticle = location.state?.article || null;
+  const isEditing = !!editArticle;
+
+  const [form, setForm] = useState(() => {
+    if (editArticle) {
+      return {
+        title: editArticle.title,
+        category: editArticle.category,
+        tags: Array.isArray(editArticle.tags) ? editArticle.tags.join(', ') : (editArticle.tags || ''),
+        content: editArticle.content,
+      };
+    }
+    return loadDraft();
+  });
+
   const [previewMode, setPreviewMode] = useState(false);
-  const [showCodeLang, setShowCodeLang] = useState(false);
 
   const update = (field, value) => {
     const next = { ...form, [field]: value };
     setForm(next);
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(next));
+    if (!isEditing) {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(next));
+    }
   };
 
   const insertAt = (before, after = '') => {
@@ -64,7 +83,7 @@ export default function Write() {
       if (firstLine.startsWith('# ')) title = firstLine.replace(/^#\s+/, '');
       setForm(prev => {
         const next = { ...prev, content, title };
-        localStorage.setItem(DRAFT_KEY, JSON.stringify(next));
+        if (!isEditing) localStorage.setItem(DRAFT_KEY, JSON.stringify(next));
         return next;
       });
     };
@@ -77,23 +96,41 @@ export default function Write() {
       return;
     }
 
-    const article = await addArticle({
-      title: form.title.trim(),
-      category: form.category,
-      tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
-      content: form.content,
-      summary: form.content.substring(0, 160).replace(/[#*`]/g, '').trim(),
-    }, token);
+    const tags = form.tags.split(',').map(t => t.trim()).filter(Boolean);
+    const summary = form.content.substring(0, 160).replace(/[#*`]/g, '').trim();
 
-    localStorage.removeItem(DRAFT_KEY);
-    navigate(`/article/${article.id}`);
+    if (isEditing) {
+      // Update existing article — date updates to today
+      await updateArticle(editArticle.id, {
+        title: form.title.trim(),
+        category: form.category,
+        tags,
+        content: form.content,
+        summary,
+        date: new Date().toISOString().split('T')[0],
+      }, token);
+      navigate(`/article/${editArticle.id}`);
+    } else {
+      // Create new article
+      const article = await addArticle({
+        title: form.title.trim(),
+        category: form.category,
+        tags,
+        content: form.content,
+        summary,
+      }, token);
+      localStorage.removeItem(DRAFT_KEY);
+      navigate(`/article/${article.id}`);
+    }
   };
 
   return (
     <div className="write-page">
       <header className="write-header">
-        <h1>Write</h1>
-        <p className="write-desc">Write in Markdown or upload a <code>.md</code> file</p>
+        <h1>{isEditing ? 'Edit Article' : 'Write'}</h1>
+        <p className="write-desc">
+          {isEditing ? `Editing "${editArticle.title}"` : 'Write in Markdown or upload a .md file'}
+        </p>
       </header>
 
       <div className="write-meta">
@@ -127,7 +164,6 @@ export default function Write() {
       {/* Toolbar */}
       <div className="write-toolbar">
         <div className="write-toolbar__left">
-          {/* Headings dropdown */}
           <div className="toolbar-dropdown">
             <button className="toolbar-dropdown__trigger">H ▾</button>
             <div className="toolbar-dropdown__menu">
@@ -144,15 +180,12 @@ export default function Write() {
 
           <span className="toolbar-sep" />
 
-          {/* Code with language selector */}
           <button onClick={() => insertAt('`', '`')} title="Inline Code">&lt;/&gt;</button>
           <div className="toolbar-dropdown">
-            <button className="toolbar-dropdown__trigger" onClick={() => setShowCodeLang(!showCodeLang)}>
-              Code ▾
-            </button>
+            <button className="toolbar-dropdown__trigger">Code ▾</button>
             <div className="toolbar-dropdown__menu toolbar-dropdown__menu--wide">
               {CODE_LANGUAGES.map(lang => (
-                <button key={lang} onClick={() => { insertAt(`\n\`\`\`${lang}\n`, '\n```\n'); setShowCodeLang(false); }}>
+                <button key={lang} onClick={() => insertAt(`\n\`\`\`${lang}\n`, '\n```\n')}>
                   {lang}
                 </button>
               ))}
@@ -193,7 +226,12 @@ export default function Write() {
       </div>
 
       <div className="write-actions">
-        <button className="write-publish" onClick={handlePublish}>Publish</button>
+        {isEditing && (
+          <button className="write-cancel" onClick={() => navigate(-1)}>Cancel</button>
+        )}
+        <button className="write-publish" onClick={handlePublish}>
+          {isEditing ? 'Update' : 'Publish'}
+        </button>
       </div>
     </div>
   );

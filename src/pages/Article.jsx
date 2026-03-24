@@ -90,7 +90,15 @@ export default function Article() {
       <div className="article-topbar">
         <Link to="/" className="article-back">← Back to articles</Link>
         {isAdmin && (
-          <button className="article-delete" onClick={handleDelete}>Delete</button>
+          <div className="article-admin-actions">
+            <button
+              className="article-edit"
+              onClick={() => navigate('/write', { state: { article } })}
+            >
+              Edit
+            </button>
+            <button className="article-delete" onClick={handleDelete}>Delete</button>
+          </div>
         )}
       </div>
 
