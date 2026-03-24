@@ -9,9 +9,9 @@ const DRAFT_KEY = 'blog-draft';
 function loadDraft() {
   try {
     const draft = localStorage.getItem(DRAFT_KEY);
-    return draft ? JSON.parse(draft) : { title: '', category: 'LLM', tags: '', content: '' };
+    return draft ? JSON.parse(draft) : { title: '', category: 'Knowledge', tags: '', content: '' };
   } catch {
-    return { title: '', category: 'LLM', tags: '', content: '' };
+    return { title: '', category: 'Knowledge', tags: '', content: '' };
   }
 }
 
@@ -105,7 +105,7 @@ export default function Write() {
             value={form.category}
             onChange={(e) => update('category', e.target.value)}
           >
-            <option value="LLM">LLM</option>
+            <option value="Knowledge">Knowledge</option>
             <option value="Paper">Paper</option>
             <option value="Code">Code</option>
           </select>

@@ -1,6 +1,7 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
+import rehypeSlug from 'rehype-slug';
 import 'highlight.js/styles/atom-one-dark.css';
 import './MarkdownRenderer.css';
 
@@ -9,9 +10,8 @@ export default function MarkdownRenderer({ content }) {
     <div className="markdown-body">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeHighlight]}
+        rehypePlugins={[rehypeHighlight, rehypeSlug]}
         components={{
-          // Add copy button to code blocks
           pre({ children, ...props }) {
             return (
               <div className="code-block-wrapper">

@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS articles (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
   date TEXT NOT NULL,
-  category TEXT NOT NULL DEFAULT 'LLM',
+  category TEXT NOT NULL DEFAULT 'Knowledge',
   tags TEXT DEFAULT '[]',
   summary TEXT DEFAULT '',
   content TEXT NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS articles (
 
 -- Seed with sample articles
 INSERT OR IGNORE INTO articles (id, title, date, category, tags, summary, content) VALUES
-('understanding-transformer-architecture', 'Understanding the Transformer Architecture: A Deep Dive', '2026-03-20', 'LLM', '["Transformer","Attention","Deep Learning"]', 'A comprehensive walkthrough of the Transformer architecture, from self-attention mechanisms to positional encoding.', '# Understanding the Transformer Architecture
+('understanding-transformer-architecture', 'Understanding the Transformer Architecture: A Deep Dive', '2026-03-20', 'Knowledge', '["Transformer","Attention","Deep Learning"]', 'A comprehensive walkthrough of the Transformer architecture, from self-attention mechanisms to positional encoding.', '# Understanding the Transformer Architecture
 
 The Transformer architecture, introduced in the seminal paper *"Attention Is All You Need"* (Vaswani et al., 2017), has revolutionized natural language processing and beyond.
 

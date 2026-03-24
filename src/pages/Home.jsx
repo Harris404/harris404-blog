@@ -3,7 +3,7 @@ import ArticleCard from '../components/ArticleCard';
 import useArticles from '../hooks/useArticles';
 import './Home.css';
 
-const categories = ['All', 'LLM', 'Paper', 'Code'];
+const categories = ['All', 'Knowledge', 'Paper', 'Code'];
 
 export default function Home() {
   const { getGroupedByYear } = useArticles();

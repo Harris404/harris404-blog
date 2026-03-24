@@ -3,7 +3,7 @@ const sampleArticles = [
     id: 'understanding-transformer-architecture',
     title: 'Understanding the Transformer Architecture: A Deep Dive',
     date: '2026-03-20',
-    category: 'LLM',
+    category: 'Knowledge',
     tags: ['Transformer', 'Attention', 'Deep Learning'],
     summary: 'A comprehensive walkthrough of the Transformer architecture, from self-attention mechanisms to positional encoding.',
     content: `# Understanding the Transformer Architecture

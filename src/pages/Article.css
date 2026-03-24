@@ -57,7 +57,7 @@
   font-size: 0.7rem;
 }
 
-.article-category--llm { color: var(--tag-llm); }
+.article-category--knowledge { color: var(--tag-knowledge); }
 .article-category--paper { color: var(--tag-paper); }
 .article-category--code { color: var(--tag-code); }
 

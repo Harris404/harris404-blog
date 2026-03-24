@@ -51,7 +51,7 @@
   font-size: 0.7rem;
 }
 
-.article-card__tag--llm { color: var(--tag-llm); }
+.article-card__tag--knowledge { color: var(--tag-knowledge); }
 .article-card__tag--paper { color: var(--tag-paper); }
 .article-card__tag--code { color: var(--tag-code); }
 
@@ -61,6 +61,7 @@
   color: var(--text-tertiary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

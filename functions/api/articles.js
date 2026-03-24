@@ -58,7 +58,7 @@ export async function onRequestPost(context) {
 
     await env.DB.prepare(
       'INSERT INTO articles (id, title, date, category, tags, summary, content) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    ).bind(id, title, date, category || 'LLM', tagsJson, summary || '', content).run();
+    ).bind(id, title, date, category || 'Knowledge', tagsJson, summary || '', content).run();
 
     return new Response(JSON.stringify({ id, title, date, category, tags }), {
       status: 201,
