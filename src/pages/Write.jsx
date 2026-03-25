@@ -349,6 +349,11 @@ export default function Write() {
           <button onClick={() => insertAt('\n| Column 1 | Column 2 | Column 3 |\n| --- | --- | --- |\n| Cell 1 | Cell 2 | Cell 3 |\n')} title="Table">Table</button>
           <button onClick={() => insertAt('- ')} title="List">List</button>
           <button onClick={() => insertAt('\n---\n')} title="Divider">—</button>
+
+          <span className="toolbar-sep" />
+
+          <button onClick={() => insertAt('$', '$')} title="Inline Math">𝑥²</button>
+          <button onClick={() => insertAt('\n$$\n', '\n$$\n')} title="Block Math">∑</button>
         </div>
 
         <div className="write-toolbar__right">

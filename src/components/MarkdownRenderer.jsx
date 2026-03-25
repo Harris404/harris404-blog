@@ -1,7 +1,10 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
 import rehypeHighlight from 'rehype-highlight';
+import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
+import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/atom-one-dark.css';
 import './MarkdownRenderer.css';
 
@@ -9,8 +12,8 @@ export default function MarkdownRenderer({ content }) {
   return (
     <div className="markdown-body">
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeHighlight, rehypeSlug]}
+        remarkPlugins={[remarkGfm, remarkMath]}
+        rehypePlugins={[rehypeKatex, rehypeHighlight, rehypeSlug]}
         components={{
           pre({ children, ...props }) {
             return (
