@@ -14,7 +14,19 @@ export default function MarkdownRenderer({ content }) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex, rehypeHighlight, rehypeSlug]}
+        urlTransform={(url) => url}
         components={{
+          img({ src, alt, ...props }) {
+            return (
+              <img
+                src={src}
+                alt={alt || ''}
+                loading="lazy"
+                {...props}
+                style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
+              />
+            );
+          },
           pre({ children, ...props }) {
             return (
               <div className="code-block-wrapper">
