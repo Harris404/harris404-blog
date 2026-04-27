@@ -11,6 +11,8 @@ const Home = lazy(() => import('./pages/Home'));
 const Article = lazy(() => import('./pages/Article'));
 const Graph = lazy(() => import('./pages/Graph'));
 const Write = lazy(() => import('./pages/Write'));
+const Series = lazy(() => import('./pages/Series'));
+const SeriesDetail = lazy(() => import('./pages/SeriesDetail'));
 const SeriesManager = lazy(() => import('./pages/SeriesManager'));
 const About = lazy(() => import('./pages/About'));
 const Login = lazy(() => import('./pages/Login'));
@@ -42,7 +44,9 @@ function AppRoutes() {
             <Route path="/article/:id" element={<Article />} />
             <Route path="/graph" element={<Graph />} />
             <Route path="/write" element={<ProtectedRoute><Write /></ProtectedRoute>} />
-            <Route path="/series" element={<ProtectedRoute><SeriesManager /></ProtectedRoute>} />
+            <Route path="/series" element={<Series />} />
+            <Route path="/series/:seriesId" element={<SeriesDetail />} />
+            <Route path="/series-manager" element={<ProtectedRoute><SeriesManager /></ProtectedRoute>} />
             <Route path="/about" element={<About />} />
             <Route path="/login" element={<Login />} />
             <Route path="*" element={<NotFound />} />

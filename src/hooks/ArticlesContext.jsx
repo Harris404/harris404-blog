@@ -12,37 +12,44 @@ export function ArticlesProvider({ children }) {
   const useApiRef = useRef(true);
   const articleCacheRef = useRef({});
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch(API_BASE);
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data)) {
-            useApiRef.current = true;
-            setArticles(data);
-            setLoading(false);
-            return;
-          }
+  const fetchArticles = useCallback(async () => {
+    try {
+      const res = await fetch(API_BASE);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          useApiRef.current = true;
+          setArticles(data);
+          setLoading(false);
+          return;
         }
-      } catch {
-        // API not available
       }
-
-      useApiRef.current = false;
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        const userArticles = stored ? JSON.parse(stored) : [];
-        const userIds = new Set(userArticles.map(a => a.id));
-        const combined = [...userArticles, ...sampleArticles.filter(a => !userIds.has(a.id))];
-        setArticles(combined);
-      } catch {
-        setArticles(sampleArticles);
-      }
-      setLoading(false);
+    } catch {
+      // API not available
     }
-    load();
+
+    useApiRef.current = false;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      const userArticles = stored ? JSON.parse(stored) : [];
+      const userIds = new Set(userArticles.map(a => a.id));
+      const combined = [...userArticles, ...sampleArticles.filter(a => !userIds.has(a.id))];
+      setArticles(combined);
+    } catch {
+      setArticles(sampleArticles);
+    }
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    fetchArticles();
+  }, [fetchArticles]);
+
+  // Expose a refresh function so consumers can re-fetch after mutations
+  const refreshArticles = useCallback(() => {
+    articleCacheRef.current = {};
+    fetchArticles();
+  }, [fetchArticles]);
 
   const addArticle = useCallback(async (articleData, token) => {
     const newArticle = {
@@ -189,6 +196,7 @@ export function ArticlesProvider({ children }) {
   const value = {
     articles, loading, addArticle, updateArticle,
     deleteArticle, getArticle, getByCategory, getGroupedByYear,
+    refreshArticles,
   };
 
   return (

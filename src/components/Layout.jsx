@@ -17,9 +17,9 @@ export default function Layout({ children }) {
   const navLinks = [
     { path: '/', label: 'Articles' },
     { path: '/graph', label: 'Graph' },
+    { path: '/series', label: 'Series' },
     ...(isAdmin ? [
       { path: '/write', label: 'Write' },
-      { path: '/series', label: 'Series' },
     ] : []),
     { path: '/about', label: 'About' },
   ];
@@ -55,7 +55,14 @@ export default function Layout({ children }) {
               onClick={() => { if (!isAdmin) navigate('/login'); }}
               title={!isAdmin ? 'Admin login' : ''}
             >
-              P
+              <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Quill pen */}
+                <path d="M8 24l3-3 2 2-3 3-2.5.5.5-2.5z" fill="#fff" opacity=".95"/>
+                <path d="M11 21l8-8c1.5-1.5 3.5-3 5.5-3.5-.5 2-2 4-3.5 5.5l-8 8-2-2z" fill="#fff" opacity=".9"/>
+                <path d="M13.5 19.5l5-5" stroke="currentColor" strokeWidth="0.6" strokeLinecap="round" opacity=".3"/>
+                {/* Code brackets */}
+                <text x="7" y="13" fontFamily="monospace" fontSize="7" fontWeight="700" fill="#fff" opacity=".85">&lt;/&gt;</text>
+              </svg>
             </div>
             <h2 className="sidebar__name">Paris</h2>
             <p className="sidebar__bio">

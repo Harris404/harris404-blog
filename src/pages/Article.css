@@ -61,7 +61,7 @@
 /* --- Layout --- */
 .article-layout {
   display: flex;
-  gap: 48px;
+  gap: 32px;
   align-items: flex-start;
   position: relative;
 }
@@ -69,7 +69,7 @@
 .article-content {
   flex: 1;
   min-width: 0;
-  max-width: 800px;
+  max-width: 720px;
 }
 
 /* --- Header --- */
@@ -139,6 +139,8 @@
 .toc {
   width: 200px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .toc__sticky {

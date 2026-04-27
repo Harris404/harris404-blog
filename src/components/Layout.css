@@ -36,7 +36,7 @@
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent), #E07A52);
   color: white;
   display: flex;
   align-items: center;
@@ -45,6 +45,7 @@
   font-size: 1.3rem;
   font-weight: 600;
   margin-bottom: 14px;
+  box-shadow: 0 2px 12px rgba(196, 90, 50, 0.25);
 }
 
 .sidebar__avatar--clickable {

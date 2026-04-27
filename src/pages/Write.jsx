@@ -403,7 +403,10 @@ export default function Write() {
   return (
     <div className="write-page">
       <header className="write-header">
-        <h1>{isEditing ? 'Edit Article' : 'Write'}</h1>
+        <div className="write-tabs">
+          <span className="write-tab write-tab--active">Write</span>
+          <span className="write-tab" onClick={() => navigate('/series')} role="button" tabIndex={0}>Series</span>
+        </div>
         <p className="write-desc">
           {isEditing ? `Editing "${editArticle.title}"` : 'Write in Markdown or upload a .md file'}
         </p>

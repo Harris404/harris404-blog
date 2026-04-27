@@ -15,6 +15,7 @@ import './Article.css';
 function slugify(text) {
   return text
     .toLowerCase()
+    .replace(/\./g, '')           // strip dots (matches github-slugger)
     .replace(/[^\p{L}\p{N}]+/gu, '-')
     .replace(/(^-|-$)/g, '');
 }
