@@ -154,7 +154,7 @@ function loadDraft() {
 export default function Write() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { articles, addArticle, updateArticle } = useArticles();
+  const { articles, addArticle, updateArticle, refreshArticles } = useArticles();
   const { token } = useAuth();
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
@@ -400,18 +400,191 @@ export default function Write() {
     }
   };
 
+  const [activeTab, setActiveTab] = useState('write');
+  const [newSeriesName, setNewSeriesName] = useState('');
+  const [seriesItems, setSeriesItems] = useState([]);
+  const [seriesSaving, setSeriesSaving] = useState(false);
+  const [seriesCreated, setSeriesCreated] = useState(null);
+
+  // Build series map for display
+  const seriesMap = useMemo(() => {
+    const map = {};
+    articles.forEach(a => {
+      if (a.series_id) {
+        if (!map[a.series_id]) map[a.series_id] = [];
+        map[a.series_id].push(a);
+      }
+    });
+    Object.keys(map).forEach(k => {
+      map[k].sort((a, b) => (a.series_order ?? 999) - (b.series_order ?? 999));
+    });
+    return map;
+  }, [articles]);
+
+  // Articles not yet in the new series being created
+  const availableForSeries = articles.filter(a => !seriesItems.some(s => s.id === a.id));
+
+  const addToNewSeries = (article) => {
+    setSeriesItems(prev => [...prev, article]);
+  };
+
+  const removeFromNewSeries = (id) => {
+    setSeriesItems(prev => prev.filter(a => a.id !== id));
+  };
+
+  const moveInSeries = (idx, dir) => {
+    setSeriesItems(prev => {
+      const list = [...prev];
+      const target = idx + dir;
+      if (target < 0 || target >= list.length) return prev;
+      [list[idx], list[target]] = [list[target], list[idx]];
+      return list;
+    });
+  };
+
+  const handleCreateSeries = async () => {
+    const name = newSeriesName.trim();
+    if (!name || seriesItems.length === 0) return;
+    const seriesId = name.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]+/g, '-').replace(/(^-|-$)/g, '');
+
+    setSeriesSaving(true);
+    try {
+      await Promise.all(seriesItems.map((a, i) =>
+        fetch(`/api/articles/${a.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ series_id: seriesId, series_order: i }),
+        })
+      ));
+      if (refreshArticles) refreshArticles();
+      setSeriesCreated(seriesId);
+      setNewSeriesName('');
+      setSeriesItems([]);
+    } catch (err) {
+      console.error('Failed to create series:', err);
+      alert('Failed to create series');
+    }
+    setSeriesSaving(false);
+  };
+
   return (
     <div className="write-page">
       <header className="write-header">
         <div className="write-tabs">
-          <span className="write-tab write-tab--active">Write</span>
-          <span className="write-tab" onClick={() => navigate('/series')} role="button" tabIndex={0}>Series</span>
+          <span
+            className={`write-tab ${activeTab === 'write' ? 'write-tab--active' : ''}`}
+            onClick={() => setActiveTab('write')}
+            role="button" tabIndex={0}
+          >Write</span>
+          <span
+            className={`write-tab ${activeTab === 'series' ? 'write-tab--active' : ''}`}
+            onClick={() => { setActiveTab('series'); setSeriesCreated(null); }}
+            role="button" tabIndex={0}
+          >Series</span>
         </div>
         <p className="write-desc">
-          {isEditing ? `Editing "${editArticle.title}"` : 'Write in Markdown or upload a .md file'}
+          {activeTab === 'write'
+            ? (isEditing ? `Editing "${editArticle.title}"` : 'Write in Markdown or upload a .md file')
+            : 'Create a new series and add notes to it'
+          }
         </p>
       </header>
 
+      {activeTab === 'series' ? (
+        /* ═══ Series Creator Tab ═══ */
+        <div className="series-creator">
+          {seriesCreated && (
+            <div className="sc-success">
+              ✅ Series <strong>{seriesCreated}</strong> created successfully!
+              <a href={`/series/${seriesCreated}`} className="sc-success__link">View series →</a>
+            </div>
+          )}
+
+          {/* Name input */}
+          <div className="sc-section">
+            <label className="sc-label">Series Name</label>
+            <input
+              className="sc-input"
+              type="text"
+              placeholder="e.g. Transformer 系列"
+              value={newSeriesName}
+              onChange={(e) => setNewSeriesName(e.target.value)}
+            />
+          </div>
+
+          {/* Selected articles (ordered) */}
+          <div className="sc-section">
+            <label className="sc-label">Notes in Series <span className="sc-label__count">({seriesItems.length})</span></label>
+            {seriesItems.length === 0 ? (
+              <p className="sc-empty">Add notes from the list below. Order matters — drag or use arrows to reorder.</p>
+            ) : (
+              <div className="sc-ordered">
+                {seriesItems.map((article, idx) => (
+                  <div key={article.id} className="sc-order-item">
+                    <span className="sc-order-num">#{idx + 1}</span>
+                    <span className="sc-order-title">{article.title}</span>
+                    <div className="sc-order-actions">
+                      <button onClick={() => moveInSeries(idx, -1)} disabled={idx === 0} title="Move up">↑</button>
+                      <button onClick={() => moveInSeries(idx, 1)} disabled={idx === seriesItems.length - 1} title="Move down">↓</button>
+                      <button onClick={() => removeFromNewSeries(article.id)} className="sc-order-remove" title="Remove">✕</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Available articles */}
+          <div className="sc-section">
+            <label className="sc-label">Available Notes</label>
+            <div className="sc-available">
+              {availableForSeries.length === 0 ? (
+                <p className="sc-empty">All notes have been added.</p>
+              ) : (
+                availableForSeries.map(article => (
+                  <div key={article.id} className="sc-avail-item">
+                    <div className="sc-avail-info">
+                      <span className={`sc-avail-cat sc-avail-cat--${article.category?.toLowerCase()}`}>{article.category}</span>
+                      <span className="sc-avail-title">{article.title}</span>
+                    </div>
+                    <button className="sc-avail-add" onClick={() => addToNewSeries(article)}>+ Add</button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Existing series (read-only) */}
+          {Object.keys(seriesMap).length > 0 && (
+            <div className="sc-section">
+              <label className="sc-label">Existing Series</label>
+              <div className="sc-existing">
+                {Object.entries(seriesMap).map(([key, items]) => (
+                  <a key={key} href={`/series/${key}`} className="sc-existing-chip">
+                    📚 {key} <span className="sc-existing-count">{items.length}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Create button */}
+          <div className="write-actions">
+            <button
+              className="write-publish"
+              onClick={handleCreateSeries}
+              disabled={!newSeriesName.trim() || seriesItems.length === 0 || seriesSaving}
+            >
+              {seriesSaving ? 'Creating...' : 'Create Series'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* ═══ Write Tab (existing) ═══ */
+        <>
       <div className="write-meta">
         <input
           className="write-input write-input--title"
@@ -621,6 +794,8 @@ export default function Write() {
           {isEditing ? 'Update' : 'Publish'}
         </button>
       </div>
+        </>
+      )}
     </div>
   );
 }
