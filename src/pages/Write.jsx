@@ -91,9 +91,9 @@ const TAG_TAXONOMY = [
 ];
 
 /**
- * Generate a smart summary from markdown content.
- * Skips: headers (#), code blocks (```), empty lines, images, HTML tags.
- * Returns the first real paragraph, max 180 chars.
+ * Generate a clean summary from markdown content.
+ * Strips: headers, code blocks, blockquotes, images, HTML, LaTeX, tables, etc.
+ * Returns the first meaningful text, max 180 chars.
  */
 function generateSummary(content) {
   if (!content) return '';
@@ -110,27 +110,41 @@ function generateSummary(content) {
     if (inCodeBlock) continue;
 
     const trimmed = line.trim();
-    // Skip headers, images, HTML tags, horizontal rules, empty lines
     if (!trimmed) continue;
+    // Skip headers, images, HTML, horizontal rules, tables
     if (trimmed.startsWith('#')) continue;
     if (trimmed.startsWith('![')) continue;
-    if (trimmed.startsWith('<')) continue;
+    if (/^<\/?[a-zA-Z]/.test(trimmed)) continue;  // HTML tags
     if (trimmed.startsWith('---') || trimmed.startsWith('***')) continue;
-    if (trimmed.startsWith('|')) continue; // tables
-    if (trimmed.startsWith('> ')) continue; // blockquotes
+    if (trimmed.startsWith('|')) continue;
 
-    // Clean markdown formatting
-    const cleaned = trimmed
-      .replace(/\*\*(.*?)\*\*/g, '$1')  // bold
-      .replace(/\*(.*?)\*/g, '$1')      // italic
-      .replace(/`(.*?)`/g, '$1')        // inline code
-      .replace(/\[(.*?)\]\(.*?\)/g, '$1') // links
-      .replace(/~~(.*?)~~/g, '$1')      // strikethrough
+    // Strip blockquote markers
+    let cleaned = trimmed.replace(/^>\s*/g, '');
+    if (!cleaned) continue;
+
+    // Strip list markers (- , * , 1. , etc.)
+    cleaned = cleaned.replace(/^[-*+]\s+/, '').replace(/^\d+\.\s+/, '');
+
+    // Strip markdown formatting
+    cleaned = cleaned
+      .replace(/\*\*(.*?)\*\*/g, '$1')     // bold
+      .replace(/\*(.*?)\*/g, '$1')         // italic
+      .replace(/`(.*?)`/g, '$1')           // inline code
+      .replace(/\[(.*?)\]\(.*?\)/g, '$1')  // links
+      .replace(/~~(.*?)~~/g, '$1')         // strikethrough
+      .replace(/!\[.*?\]\(.*?\)/g, '')     // inline images
+      .replace(/<img[^>]*>/g, '')          // HTML images
+      .replace(/<[^>]+>/g, '')             // other HTML
+      .replace(/\$\$[^$]*\$\$/g, '')       // block LaTeX
+      .replace(/\$[^$]+\$/g, '')           // inline LaTeX
+      .replace(/\{[^}]*\}/g, '')           // LaTeX braces
+      .replace(/\\[a-zA-Z]+/g, '')         // LaTeX commands
+      .replace(/[🟢🟡🔴📚📄📖🗺️✅❌💡⚡🔥🎯]\s*/g, '') // emoji
+      .replace(/\s+/g, ' ')               // collapse whitespace
       .trim();
 
     if (cleaned.length > 10) {
       textLines.push(cleaned);
-      // Get enough text for a good summary
       if (textLines.join(' ').length >= 180) break;
     }
   }

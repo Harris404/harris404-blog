@@ -2,6 +2,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useState, useCallback } from 'react';
 import useArticles from '../hooks/useArticles';
 import { useAuth } from '../hooks/useAuth';
+import { cleanSummary } from '../utils/cleanSummary';
 import './Series.css';
 
 const API_BASE = '/api/articles';
@@ -168,11 +169,14 @@ export default function SeriesDetail() {
               <span className="series-note__num">{idx + 1}</span>
               <Link to={`/article/${article.id}`} className="series-note__link">
                 <h3 className="series-note__title">{article.title}</h3>
-                {article.summary && (
-                  <p className="series-note__summary">
-                    {article.summary.length > 120 ? article.summary.substring(0, 120) + '…' : article.summary}
-                  </p>
-                )}
+                {article.summary && (() => {
+                  const cleaned = cleanSummary(article.summary);
+                  return cleaned ? (
+                    <p className="series-note__summary">
+                      {cleaned.length > 120 ? cleaned.substring(0, 120) + '…' : cleaned}
+                    </p>
+                  ) : null;
+                })()}
                 <div className="series-note__meta">
                   <span className={`series-note__cat series-note__cat--${article.category?.toLowerCase()}`}>
                     {article.category}

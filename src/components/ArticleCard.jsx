@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { cleanSummary } from '../utils/cleanSummary';
 import './ArticleCard.css';
 
 export default function ArticleCard({ article, index }) {
@@ -17,6 +18,8 @@ export default function ArticleCard({ article, index }) {
   const tags = Array.isArray(article.tags)
     ? article.tags
     : (typeof article.tags === 'string' ? JSON.parse(article.tags || '[]') : []);
+
+  const displaySummary = cleanSummary(article.summary);
 
   return (
     <Link
@@ -45,8 +48,8 @@ export default function ArticleCard({ article, index }) {
           )}
         </div>
         <h3 className="article-card__title">{article.title}</h3>
-        {article.summary && (
-          <p className="article-card__summary">{article.summary}</p>
+        {displaySummary && (
+          <p className="article-card__summary">{displaySummary}</p>
         )}
         {tags.length > 0 && (
           <div className="article-card__tags">
@@ -66,3 +69,4 @@ export default function ArticleCard({ article, index }) {
     </Link>
   );
 }
+

@@ -1,14 +1,22 @@
 import { Link } from 'react-router-dom';
 import useArticles from '../hooks/useArticles';
-import { useAuth } from '../hooks/useAuth';
-import { useState } from 'react';
 import './Series.css';
+
+/**
+ * Auto-generate a series description from its articles' titles.
+ * e.g. "Covers: AI agent面试架构题, AI agent 主流框架问题"
+ */
+function generateSeriesDesc(items) {
+  if (!items || items.length === 0) return '';
+  const titles = items.map(a => a.title);
+  if (titles.length <= 3) {
+    return `Covers: ${titles.join(', ')}`;
+  }
+  return `Covers: ${titles.slice(0, 3).join(', ')} and ${titles.length - 3} more`;
+}
 
 export default function Series() {
   const { articles, loading } = useArticles();
-  const { isAdmin, token } = useAuth();
-  const [newSeriesName, setNewSeriesName] = useState('');
-  const [creating, setCreating] = useState(false);
 
   // Build series map from articles
   const seriesMap = {};
@@ -25,15 +33,6 @@ export default function Series() {
   }
 
   const seriesKeys = Object.keys(seriesMap);
-
-  const handleCreateSeries = () => {
-    const name = newSeriesName.trim();
-    if (!name) return;
-    const id = name.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]+/g, '-').replace(/(^-|-$)/g, '');
-    // Just navigate to the new series detail page — it'll be empty
-    setNewSeriesName('');
-    window.location.href = `/series/${id}`;
-  };
 
   if (loading) {
     return (
@@ -52,44 +51,21 @@ export default function Series() {
         </p>
       </header>
 
-      {/* Admin: create new series */}
-      {isAdmin && (
-        <div className="series-create">
-          <input
-            className="series-create__input"
-            type="text"
-            placeholder="New series name..."
-            value={newSeriesName}
-            onChange={(e) => setNewSeriesName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleCreateSeries()}
-          />
-          <button
-            className="series-create__btn"
-            onClick={handleCreateSeries}
-            disabled={!newSeriesName.trim()}
-          >
-            + Create
-          </button>
-        </div>
-      )}
-
       {seriesKeys.length === 0 ? (
         <p className="series-empty">No series yet.</p>
       ) : (
         <div className="series-grid">
           {seriesKeys.map(key => {
             const items = seriesMap[key];
-            const firstSummary = items[0]?.summary || items[0]?.title || '';
+            const desc = generateSeriesDesc(items);
             return (
               <Link key={key} to={`/series/${key}`} className="series-card">
                 <div className="series-card__icon">📚</div>
                 <div className="series-card__body">
                   <h3 className="series-card__title">{key}</h3>
                   <p className="series-card__count">{items.length} {items.length === 1 ? 'note' : 'notes'}</p>
-                  {firstSummary && (
-                    <p className="series-card__summary">
-                      {firstSummary.length > 80 ? firstSummary.substring(0, 80) + '…' : firstSummary}
-                    </p>
+                  {desc && (
+                    <p className="series-card__summary">{desc}</p>
                   )}
                 </div>
                 <span className="series-card__arrow">→</span>
