@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://paris-blog-22b.pages.dev/api/sitemap.xml
+
+# Disallow admin pages
+Disallow: /login
+Disallow: /write
+Disallow: /series

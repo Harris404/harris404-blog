@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
 import ArticleCard from '../components/ArticleCard';
+import SearchBar from '../components/SearchBar';
 import useArticles from '../hooks/useArticles';
 import './Home.css';
 
@@ -43,12 +45,19 @@ export default function Home() {
 
   return (
     <div className="home">
+      <Helmet>
+        <title>Paris-blog — AI & LLM Deep Dives</title>
+        <meta name="description" content="Notes on large language models, paper analyses, and code implementations by Paris." />
+      </Helmet>
+
       <header className="home__header">
         <h1 className="home__title">Paris's Thoughts</h1>
         <p className="home__desc">
           Notes on large language models, paper analyses, and code.
         </p>
       </header>
+
+      <SearchBar articles={articles} />
 
       <div className="home__filters">
         {categories.map(cat => (

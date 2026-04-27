@@ -1,0 +1,407 @@
+/* ─── Architecture Explorer ───────────────────── */
+.ae-container {
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  background: #fafaf8;
+  overflow: hidden;
+  margin: 1.5em 0;
+}
+
+.ae-header {
+  padding: 16px 20px 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.ae-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #0f9e75, #0a7a5c);
+  color: #fff;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.ae-title {
+  margin: 8px 0 2px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c2c2a;
+}
+
+.ae-desc {
+  margin: 0;
+  font-size: 13px;
+  color: #8A857D;
+}
+
+/* ─── Body ─────────────────────────────────────── */
+.ae-body {
+  padding: 16px 20px;
+}
+
+/* ─── SVG Wrap ─────────────────────────────────── */
+.ae-svg-wrap {
+  display: flex;
+  justify-content: center;
+  transition: all 0.35s ease;
+}
+
+.ae-svg {
+  width: 100%;
+  max-width: 480px;
+  transition: all 0.35s ease;
+}
+
+.ae-svg-wrap--compact .ae-svg {
+  max-width: 320px;
+  opacity: 0.7;
+}
+
+/* ─── Layer Blocks (SVG interactivity) ─────────── */
+.ae-layer-rect {
+  transition: filter 0.2s, stroke-width 0.2s, stroke 0.2s;
+}
+
+.ae-layer-group:hover .ae-layer-rect {
+  filter: url(#ae-glow);
+  stroke-width: 2;
+}
+
+.ae-layer-group {
+  cursor: pointer;
+}
+
+/* ─── Detail Panel ─────────────────────────────── */
+.ae-detail {
+  margin-top: 16px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 10px;
+  animation: ae-slideIn 0.3s ease;
+}
+
+@keyframes ae-slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ae-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+  background: #fafaf8;
+  color: #5C5954;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 12px;
+}
+
+.ae-back-btn:hover {
+  background: #f0efed;
+  border-color: rgba(0,0,0,0.15);
+}
+
+.ae-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ae-detail-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ae-detail-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: #2c2c2a;
+}
+
+/* Full content rendered from DOM */
+.ae-detail-content {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 4px 0;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  margin-top: 12px;
+}
+
+.ae-detail-content svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.ae-detail-content h2 {
+  font-size: 16px;
+  margin-top: 24px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.ae-detail-content h2:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.ae-detail-content h3 {
+  font-size: 14px;
+}
+
+.ae-detail-loading {
+  color: #8A857D;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.ae-detail-points {
+  margin: 0 0 12px;
+  padding-left: 20px;
+  list-style: none;
+}
+
+.ae-detail-points li {
+  position: relative;
+  padding: 4px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #3c3a36;
+}
+
+.ae-detail-points li::before {
+  content: '•';
+  position: absolute;
+  left: -16px;
+  color: #0f9e75;
+  font-weight: bold;
+}
+
+.ae-detail-formula {
+  padding: 10px 16px;
+  background: #f8f8f6;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.05);
+  margin-bottom: 12px;
+}
+
+.ae-detail-formula code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 13px;
+  color: #4040aa;
+}
+
+/* ─── Layer-specific Visuals ───────────────────── */
+.ae-detail-visual {
+  margin-top: 12px;
+  padding: 14px;
+  background: #f8faf9;
+  border-radius: 8px;
+  border: 1px solid rgba(15, 158, 117, 0.15);
+  overflow-x: auto;
+}
+
+/* Attention flow */
+.ae-attn-flow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ae-attn-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 32px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.ae-attn-q { background: #eeedfe; color: #3c3489; border: 1px solid #7f77dd; }
+.ae-attn-k { background: #e1f5ee; color: #085041; border: 1px solid #1d9e75; }
+.ae-attn-v { background: #faece7; color: #4a1b0c; border: 1px solid #d85a30; }
+.ae-attn-out { background: #fdf8e1; color: #7a6010; border: 1px solid #c8a92a; width: 60px; }
+
+.ae-attn-arrow {
+  color: #aaa;
+  font-size: 16px;
+}
+
+.ae-attn-op {
+  padding: 4px 8px;
+  background: #f0f0ee;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #5C5954;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* FFN flow */
+.ae-ffn-flow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ae-ffn-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  background: #f0eeff;
+  color: #4040aa;
+  border: 1px solid #7070cc;
+}
+
+.ae-ffn-wide {
+  background: #e6faf5;
+  color: #0a7a5c;
+  border-color: #0f9e75;
+  padding: 6px 20px;
+}
+
+.ae-ffn-arrow {
+  color: #888;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Residual flow */
+.ae-residual-flow {
+  text-align: center;
+}
+
+.ae-res-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ae-res-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #7a6010;
+}
+
+.ae-res-arrow {
+  color: #aaa;
+  font-size: 16px;
+}
+
+.ae-res-box {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  background: #f0eeff;
+  color: #4040aa;
+  border: 1px solid #7070cc;
+}
+
+.ae-res-add {
+  background: #e6faf5;
+  color: #0a7a5c;
+  border-color: #0f9e75;
+}
+
+.ae-res-skip {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #0f9e75;
+  font-style: italic;
+}
+
+/* ─── Footer ───────────────────────────────────── */
+.ae-footer {
+  padding: 10px 20px;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  text-align: center;
+}
+
+.ae-footer-hint {
+  font-size: 12px;
+  color: #8A857D;
+}
+
+/* ─── Dark mode ────────────────────────────────── */
+[data-theme="dark"] .ae-container {
+  background: #1a1a1a;
+  border-color: rgba(255,255,255,0.08);
+}
+
+[data-theme="dark"] .ae-header {
+  border-bottom-color: rgba(255,255,255,0.06);
+}
+
+[data-theme="dark"] .ae-title,
+[data-theme="dark"] .ae-detail-title {
+  color: #e8e6e0;
+}
+
+[data-theme="dark"] .ae-detail {
+  background: #222;
+  border-color: rgba(255,255,255,0.08);
+}
+
+[data-theme="dark"] .ae-back-btn {
+  background: #2a2a2a;
+  border-color: rgba(255,255,255,0.1);
+  color: #ccc;
+}
+
+[data-theme="dark"] .ae-back-btn:hover {
+  background: #333;
+}
+
+[data-theme="dark"] .ae-detail-points li {
+  color: #ccc;
+}
+
+[data-theme="dark"] .ae-detail-formula {
+  background: #2a2a2a;
+  border-color: rgba(255,255,255,0.06);
+}
+
+[data-theme="dark"] .ae-detail-visual {
+  background: #1e2d26;
+  border-color: rgba(15,158,117,0.2);
+}
+
+[data-theme="dark"] .ae-footer {
+  border-top-color: rgba(255,255,255,0.06);
+}
+
+[data-theme="dark"] .ae-attn-op,
+[data-theme="dark"] .ae-ffn-arrow {
+  background: #2a2a2a;
+  color: #aaa;
+}

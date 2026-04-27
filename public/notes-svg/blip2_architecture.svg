@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" font-family="'Inter', 'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <filter id="sh" x="-4%" y="-6%" width="108%" height="116%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.15"/>
+    </filter>
+    <marker id="a1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#374151"/>
+    </marker>
+    <marker id="aO" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#c2410c"/>
+    </marker>
+  </defs>
+
+  <rect width="960" height="560" fill="#fff"/>
+
+  <text x="480" y="30" text-anchor="middle" fill="#111827" font-size="20" font-weight="800">BLIP-2: Bootstrapping Language-Image Pre-training</text>
+  <text x="480" y="50" text-anchor="middle" fill="#4b5563" font-size="12" font-weight="600">冻结预训练模型 ❄️ + 只训练轻量桥梁 🔥</text>
+
+  <!-- STAGE 1 -->
+  <rect x="15" y="68" width="460" height="235" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="245" y="92" text-anchor="middle" fill="#065f46" font-size="14" font-weight="800">Stage 1: Vision-Language Representation</text>
+  <text x="245" y="110" text-anchor="middle" fill="#047857" font-size="10" font-weight="500">Q-Former 学会从图像中提取语义信息（无 LLM）</text>
+
+  <rect x="35" y="126" width="120" height="50" rx="8" fill="#4338ca" filter="url(#sh)"/>
+  <text x="95" y="148" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Image Encoder</text>
+  <text x="95" y="166" text-anchor="middle" fill="#c7d2fe" font-size="10">❄️ 冻结</text>
+
+  <rect x="200" y="122" width="150" height="58" rx="8" fill="#ea580c" filter="url(#sh)"/>
+  <text x="275" y="146" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">Q-Former</text>
+  <text x="275" y="162" text-anchor="middle" fill="#ffedd5" font-size="9" font-weight="600">🔥 训练 (~188M参数)</text>
+  <text x="275" y="175" text-anchor="middle" fill="#fed7aa" font-size="8">Cross Attn + Self Attn + Text 分支</text>
+
+  <line x1="155" y1="151" x2="198" y2="151" stroke="#374151" stroke-width="2" marker-end="url(#a1)"/>
+  <text x="177" y="144" text-anchor="middle" fill="#374151" font-size="9" font-weight="700">K,V</text>
+
+  <rect x="238" y="196" width="80" height="26" rx="5" fill="#fff7ed" stroke="#c2410c" stroke-width="2"/>
+  <text x="278" y="213" text-anchor="middle" fill="#9a3412" font-size="10" font-weight="700">Queries (32)</text>
+  <line x1="278" y1="196" x2="278" y2="180" stroke="#c2410c" stroke-width="1.5" marker-end="url(#aO)"/>
+
+  <!-- 3 objectives -->
+  <rect x="35" y="240" width="120" height="32" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
+  <text x="95" y="254" text-anchor="middle" fill="#065f46" font-size="9" font-weight="700">ITC 对比学习</text>
+  <text x="95" y="266" text-anchor="middle" fill="#047857" font-size="8">Uni-modal Mask</text>
+
+  <rect x="170" y="240" width="120" height="32" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
+  <text x="230" y="254" text-anchor="middle" fill="#065f46" font-size="9" font-weight="700">ITM 图文匹配</text>
+  <text x="230" y="266" text-anchor="middle" fill="#047857" font-size="8">Bi-directional Mask</text>
+
+  <rect x="305" y="240" width="120" height="32" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
+  <text x="365" y="254" text-anchor="middle" fill="#065f46" font-size="9" font-weight="700">ITG 条件生成</text>
+  <text x="365" y="266" text-anchor="middle" fill="#047857" font-size="8">Causal Mask</text>
+
+  <!-- STAGE 2 -->
+  <rect x="490" y="68" width="455" height="235" rx="12" fill="#faf5ff" stroke="#7c3aed" stroke-width="2"/>
+  <text x="717" y="92" text-anchor="middle" fill="#581c87" font-size="14" font-weight="800">Stage 2: Vision-to-Language Generation</text>
+  <text x="717" y="110" text-anchor="middle" fill="#6d28d9" font-size="10" font-weight="500">连接 Q-Former 到冻结的 LLM</text>
+
+  <rect x="510" y="132" width="95" height="46" rx="8" fill="#4338ca" filter="url(#sh)"/>
+  <text x="557" y="152" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">Image Enc</text>
+  <text x="557" y="168" text-anchor="middle" fill="#c7d2fe" font-size="10">❄️</text>
+
+  <rect x="630" y="128" width="90" height="54" rx="8" fill="#ea580c" filter="url(#sh)"/>
+  <text x="675" y="150" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">Q-Former</text>
+  <text x="675" y="168" text-anchor="middle" fill="#ffedd5" font-size="10">🔥</text>
+
+  <rect x="740" y="138" width="55" height="36" rx="6" fill="#c2410c" filter="url(#sh)"/>
+  <text x="767" y="156" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">FC</text>
+  <text x="767" y="168" text-anchor="middle" fill="#fed7aa" font-size="8">🔥</text>
+
+  <rect x="815" y="125" width="115" height="62" rx="8" fill="#0e7490" filter="url(#sh)"/>
+  <text x="872" y="150" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">LLM</text>
+  <text x="872" y="166" text-anchor="middle" fill="#cffafe" font-size="10">❄️ 冻结</text>
+  <text x="872" y="180" text-anchor="middle" fill="#a5f3fc" font-size="9">OPT / FlanT5</text>
+
+  <line x1="605" y1="155" x2="628" y2="155" stroke="#374151" stroke-width="2" marker-end="url(#a1)"/>
+  <line x1="720" y1="155" x2="738" y2="155" stroke="#374151" stroke-width="2" marker-end="url(#a1)"/>
+  <line x1="795" y1="155" x2="813" y2="155" stroke="#374151" stroke-width="2" marker-end="url(#a1)"/>
+
+  <rect x="790" y="205" width="140" height="28" rx="6" fill="#ecfeff" stroke="#0e7490" stroke-width="2"/>
+  <text x="860" y="224" text-anchor="middle" fill="#155e75" font-size="10" font-weight="600">"a cat wearing sunglasses"</text>
+  <path d="M 872 187 L 872 195 L 860 203" stroke="#374151" stroke-width="1.5" fill="none" marker-end="url(#a1)"/>
+
+  <rect x="643" y="198" width="65" height="24" rx="5" fill="#fff7ed" stroke="#c2410c" stroke-width="1.5"/>
+  <text x="675" y="214" text-anchor="middle" fill="#9a3412" font-size="9" font-weight="600">Queries</text>
+  <line x1="675" y1="198" x2="675" y2="182" stroke="#c2410c" stroke-width="1.2" marker-end="url(#aO)"/>
+
+  <!-- Stage transition -->
+  <path d="M 475 220 Q 482 220 482 185 Q 482 160 490 160" stroke="#7c3aed" stroke-width="2.5" fill="none" stroke-dasharray="5,3" marker-end="url(#a1)"/>
+  <text x="482" y="238" text-anchor="middle" fill="#6d28d9" font-size="9" font-weight="700">权重迁移</text>
+
+  <!-- TABLE -->
+  <rect x="15" y="325" width="930" height="220" rx="12" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.5"/>
+  <text x="480" y="352" text-anchor="middle" fill="#111827" font-size="16" font-weight="800">参数与训练对比</text>
+
+  <line x1="35" y1="368" x2="925" y2="368" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="110" y="363" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">模型</text>
+  <text x="270" y="363" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">总参数</text>
+  <text x="410" y="363" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">训练参数</text>
+  <text x="580" y="363" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">训练了什么</text>
+  <text x="790" y="363" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">训练数据量</text>
+
+  <!-- Rows -->
+  <text x="110" y="396" text-anchor="middle" fill="#374151" font-size="12">CoCa-Base</text>
+  <text x="270" y="396" text-anchor="middle" fill="#374151" font-size="12">365M</text>
+  <text x="410" y="396" text-anchor="middle" fill="#dc2626" font-size="12" font-weight="700">383M</text>
+  <text x="580" y="396" text-anchor="middle" fill="#374151" font-size="12">整个模型 end-to-end</text>
+  <text x="790" y="396" text-anchor="middle" fill="#374151" font-size="12">40亿+</text>
+  <line x1="35" y1="407" x2="925" y2="407" stroke="#e5e7eb" stroke-width="1"/>
+
+  <text x="110" y="430" text-anchor="middle" fill="#374151" font-size="12">CoCa-Large</text>
+  <text x="270" y="430" text-anchor="middle" fill="#374151" font-size="12">787M</text>
+  <text x="410" y="430" text-anchor="middle" fill="#dc2626" font-size="12" font-weight="700">787M</text>
+  <text x="580" y="430" text-anchor="middle" fill="#374151" font-size="12">整个模型 end-to-end</text>
+  <text x="790" y="430" text-anchor="middle" fill="#374151" font-size="12">40亿+</text>
+  <line x1="35" y1="441" x2="925" y2="441" stroke="#e5e7eb" stroke-width="1"/>
+
+  <rect x="35" y="448" width="890" height="32" rx="6" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+  <text x="110" y="468" text-anchor="middle" fill="#9a3412" font-size="12" font-weight="800">BLIP-2</text>
+  <text x="270" y="468" text-anchor="middle" fill="#9a3412" font-size="12" font-weight="700">3.1B</text>
+  <text x="410" y="468" text-anchor="middle" fill="#047857" font-size="12" font-weight="800">104M ✅</text>
+  <text x="580" y="468" text-anchor="middle" fill="#9a3412" font-size="12" font-weight="600">仅桥梁模块</text>
+  <text x="790" y="468" text-anchor="middle" fill="#9a3412" font-size="12">1.29亿</text>
+
+  <text x="110" y="505" text-anchor="middle" fill="#374151" font-size="12">LLaVA</text>
+  <text x="270" y="505" text-anchor="middle" fill="#374151" font-size="12">~7B+</text>
+  <text x="410" y="505" text-anchor="middle" fill="#047857" font-size="12" font-weight="700">W + LLM</text>
+  <text x="580" y="505" text-anchor="middle" fill="#374151" font-size="12">线性层 + LLM微调</text>
+  <text x="790" y="505" text-anchor="middle" fill="#374151" font-size="12">75万</text>
+
+  <text x="480" y="535" text-anchor="middle" fill="#b45309" font-size="11" font-weight="700">💡 BLIP-2 总参数是 CoCa 的 4 倍，但训练参数只有 CoCa 的 1/7</text>
+</svg>

@@ -1,8 +1,14 @@
+import { Helmet } from 'react-helmet-async';
 import './About.css';
 
 export default function About() {
   return (
     <div className="about-page">
+      <Helmet>
+        <title>About Paris — Paris-blog</title>
+        <meta name="description" content="Hi, I'm Paris — an AI researcher and developer passionate about understanding and building with Large Language Models." />
+      </Helmet>
+
       <div className="about-content">
         <h1>About</h1>
 
@@ -36,9 +42,8 @@ export default function About() {
         <section className="about-section">
           <h3>Connect</h3>
           <div className="about-links">
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub →</a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">Twitter / X →</a>
-            <a href="mailto:harris@example.com">Email →</a>
+            <a href="https://github.com/Harris404" target="_blank" rel="noopener noreferrer">GitHub →</a>
+            <a href="mailto:wjunhao02@gmail.com">Email →</a>
           </div>
         </section>
       </div>

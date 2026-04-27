@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" font-family="'Inter', 'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <filter id="sh" x="-4%" y="-6%" width="108%" height="116%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.15"/>
+    </filter>
+    <marker id="a1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#374151"/>
+    </marker>
+    <marker id="aO" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#b45309"/>
+    </marker>
+    <marker id="aB" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#1d4ed8"/>
+    </marker>
+  </defs>
+
+  <rect width="960" height="620" fill="#fff"/>
+
+  <text x="480" y="30" text-anchor="middle" fill="#111827" font-size="20" font-weight="800">CoCa: Contrastive Captioners 架构</text>
+  <text x="480" y="50" text-anchor="middle" fill="#4b5563" font-size="12" font-weight="500">对比学习 + 图像描述生成 统一框架</text>
+
+  <!-- IMAGE ENCODER -->
+  <rect x="30" y="75" width="160" height="55" rx="10" fill="#4338ca" filter="url(#sh)"/>
+  <text x="110" y="98" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Image Encoder (ViT)</text>
+  <text x="110" y="118" text-anchor="middle" fill="#c7d2fe" font-size="11" font-weight="600">🔥 训练</text>
+
+  <!-- Patch Features -->
+  <rect x="40" y="165" width="140" height="40" rx="8" fill="#eef2ff" stroke="#4338ca" stroke-width="2"/>
+  <text x="110" y="190" text-anchor="middle" fill="#3730a3" font-size="12" font-weight="700">Patch Features (256×D)</text>
+  <line x1="110" y1="130" x2="110" y2="163" stroke="#374151" stroke-width="2" marker-end="url(#a1)"/>
+
+  <!-- ATTENTIONAL POOLING 1 -->
+  <rect x="240" y="72" width="200" height="58" rx="10" fill="#047857" filter="url(#sh)"/>
+  <text x="340" y="94" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Attentional Pooling</text>
+  <text x="340" y="115" text-anchor="middle" fill="#d1fae5" font-size="10" font-weight="500">1 Query → Q · K,V ← Patches</text>
+
+  <!-- ATTENTIONAL POOLING 2 -->
+  <rect x="240" y="155" width="200" height="58" rx="10" fill="#047857" filter="url(#sh)"/>
+  <text x="340" y="177" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Attentional Pooling</text>
+  <text x="340" y="198" text-anchor="middle" fill="#d1fae5" font-size="10" font-weight="500">N Queries → Q · K,V ← Patches</text>
+
+  <!-- Arrows patches → pools -->
+  <path d="M 180 185 Q 210 100 238 100" stroke="#059669" stroke-width="2" fill="none" marker-end="url(#a1)"/>
+  <path d="M 180 185 L 238 184" stroke="#059669" stroke-width="2" fill="none" marker-end="url(#a1)"/>
+
+  <!-- con_feature -->
+  <rect x="490" y="78" width="145" height="44" rx="8" fill="#fef3c7" stroke="#b45309" stroke-width="2.5"/>
+  <text x="562" y="97" text-anchor="middle" fill="#92400e" font-size="11" font-weight="700">con_feature (1×D)</text>
+  <text x="562" y="114" text-anchor="middle" fill="#78350f" font-size="10">全局图像表示</text>
+  <line x1="440" y1="100" x2="488" y2="100" stroke="#374151" stroke-width="2" marker-end="url(#a1)"/>
+
+  <!-- cap_feature -->
+  <rect x="490" y="161" width="145" height="44" rx="8" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2.5"/>
+  <text x="562" y="180" text-anchor="middle" fill="#1e3a8a" font-size="11" font-weight="700">cap_feature (N×D)</text>
+  <text x="562" y="197" text-anchor="middle" fill="#1e40af" font-size="10">多视角图像特征</text>
+  <line x1="440" y1="184" x2="488" y2="184" stroke="#374151" stroke-width="2" marker-end="url(#a1)"/>
+
+  <!-- TEXT INPUT -->
+  <rect x="30" y="262" width="380" height="35" rx="6" fill="#f3f4f6" stroke="#6b7280" stroke-width="1.5"/>
+  <text x="220" y="284" text-anchor="middle" fill="#111827" font-size="11" font-weight="600">输入文本: [s] two dogs running in a field [CLS]</text>
+  <line x1="220" y1="297" x2="220" y2="320" stroke="#374151" stroke-width="2" marker-end="url(#a1)"/>
+
+  <!-- UNIMODAL TRANSFORMER -->
+  <rect x="80" y="322" width="280" height="55" rx="10" fill="#be123c" filter="url(#sh)"/>
+  <text x="220" y="345" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Unimodal Transformer 🔥</text>
+  <text x="220" y="365" text-anchor="middle" fill="#fecdd3" font-size="10" font-weight="500">cross_attn = None（不看图像）</text>
+
+  <!-- CLS output -->
+  <rect x="45" y="418" width="150" height="44" rx="8" fill="#fef3c7" stroke="#b45309" stroke-width="2.5"/>
+  <text x="120" y="437" text-anchor="middle" fill="#92400e" font-size="11" font-weight="700">[CLS] token (1×D)</text>
+  <text x="120" y="454" text-anchor="middle" fill="#78350f" font-size="10">纯文本表示</text>
+  <path d="M 170 377 L 120 416" stroke="#b45309" stroke-width="2" fill="none" marker-end="url(#aO)"/>
+
+  <!-- 其余tokens -->
+  <rect x="230" y="418" width="140" height="44" rx="8" fill="#f3f4f6" stroke="#6b7280" stroke-width="2"/>
+  <text x="300" y="437" text-anchor="middle" fill="#1f2937" font-size="11" font-weight="600">其余 Tokens</text>
+  <text x="300" y="454" text-anchor="middle" fill="#4b5563" font-size="10">→ 送入多模态层</text>
+  <path d="M 270 377 L 300 416" stroke="#374151" stroke-width="2" fill="none" marker-end="url(#a1)"/>
+
+  <!-- MULTIMODAL TRANSFORMER -->
+  <rect x="440" y="322" width="280" height="55" rx="10" fill="#1d4ed8" filter="url(#sh)"/>
+  <text x="580" y="345" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Multimodal Transformer 🔥</text>
+  <text x="580" y="365" text-anchor="middle" fill="#bfdbfe" font-size="10" font-weight="500">Cross Attention 融合图像信息</text>
+
+  <!-- Arrow: tokens → multimodal -->
+  <path d="M 370 440 Q 400 440 410 390 Q 420 350 438 350" stroke="#374151" stroke-width="2" fill="none" marker-end="url(#a1)"/>
+
+  <!-- Arrow: cap_feature → multimodal -->
+  <path d="M 562 205 L 562 240 Q 562 270 640 295 Q 700 316 700 320" stroke="#1d4ed8" stroke-width="2.5" fill="none" marker-end="url(#aB)" stroke-dasharray="6,3"/>
+  <text x="660" y="265" fill="#1d4ed8" font-size="10" font-weight="700">cross_attn</text>
+
+  <!-- multimodal_out -->
+  <rect x="490" y="418" width="145" height="44" rx="8" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+  <text x="562" y="437" text-anchor="middle" fill="#1e3a8a" font-size="11" font-weight="600">multimodal_out</text>
+  <text x="562" y="454" text-anchor="middle" fill="#1e40af" font-size="10">融合图文信息</text>
+  <line x1="580" y1="377" x2="570" y2="416" stroke="#374151" stroke-width="2" marker-end="url(#a1)"/>
+
+  <!-- CONTRASTIVE LOSS -->
+  <rect x="30" y="510" width="330" height="52" rx="12" fill="#ea580c" filter="url(#sh)"/>
+  <text x="195" y="533" text-anchor="middle" fill="#fff" font-size="15" font-weight="800">对比损失 ℒ_Con</text>
+  <text x="195" y="551" text-anchor="middle" fill="#fed7aa" font-size="11">余弦相似度：配对↑ 不配对↓</text>
+
+  <path d="M 120 462 L 160 508" stroke="#b45309" stroke-width="2.5" fill="none" marker-end="url(#aO)"/>
+  <path d="M 635 100 Q 790 100 790 400 Q 790 490 680 510 L 362 530" stroke="#b45309" stroke-width="2" fill="none" marker-end="url(#aO)" stroke-dasharray="6,3"/>
+  <text x="806" y="310" fill="#92400e" font-size="10" font-weight="700" transform="rotate(90,806,310)">con_feature</text>
+
+  <!-- CAPTIONING LOSS -->
+  <rect x="460" y="510" width="330" height="52" rx="12" fill="#7c3aed" filter="url(#sh)"/>
+  <text x="625" y="533" text-anchor="middle" fill="#fff" font-size="15" font-weight="800">生成损失 ℒ_Cap</text>
+  <text x="625" y="551" text-anchor="middle" fill="#ddd6fe" font-size="11">Cross-Entropy：逐位置预测下一个词</text>
+
+  <path d="M 562 462 L 590 508" stroke="#6d28d9" stroke-width="2.5" fill="none" marker-end="url(#a1)"/>
+
+  <!-- Legend -->
+  <rect x="720" y="72" width="210" height="90" rx="8" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.5"/>
+  <text x="825" y="92" text-anchor="middle" fill="#111827" font-size="11" font-weight="700">图例</text>
+  <rect x="738" y="100" width="14" height="14" rx="2" fill="#fef3c7" stroke="#b45309" stroke-width="2"/>
+  <text x="762" y="112" fill="#374151" font-size="10" font-weight="500">参与对比损失</text>
+  <rect x="738" y="120" width="14" height="14" rx="2" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+  <text x="762" y="132" fill="#374151" font-size="10" font-weight="500">参与生成损失</text>
+  <rect x="738" y="140" width="14" height="14" rx="2" fill="#047857"/>
+  <text x="762" y="152" fill="#374151" font-size="10" font-weight="500">Attentional Pooling</text>
+
+  <!-- Bottom -->
+  <rect x="30" y="580" width="900" height="30" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="480" y="600" text-anchor="middle" fill="#78350f" font-size="11" font-weight="700">🔑 Unimodal [CLS]→对比损失（纯文本）· Multimodal 输出→生成损失（融合图像）· 两需求矛盾→同一解码器不同层分别满足</text>
+</svg>

@@ -10,6 +10,14 @@ export default function ArticleCard({ article, index }) {
     year: 'numeric',
   });
 
+  const readingTime = article.content
+    ? Math.max(1, Math.ceil(article.content.split(/\s+/).length / 200))
+    : null;
+
+  const tags = Array.isArray(article.tags)
+    ? article.tags
+    : (typeof article.tags === 'string' ? JSON.parse(article.tags || '[]') : []);
+
   return (
     <Link
       to={`/article/${article.id}`}
@@ -17,18 +25,42 @@ export default function ArticleCard({ article, index }) {
       style={{ animationDelay: `${index * 40}ms` }}
     >
       <div className="article-card__content">
-        <h3 className="article-card__title">{article.title}</h3>
         <div className="article-card__meta">
-          <span className="article-card__author">Paris</span>
-          <span className="article-card__sep">·</span>
-          <span className="article-card__date">{formattedDate}</span>
-          <span className="article-card__sep">·</span>
           <span className={`article-card__tag article-card__tag--${article.category.toLowerCase()}`}>
             {article.category}
           </span>
+          <span className="article-card__sep">·</span>
+          <span className="article-card__date">{formattedDate}</span>
+          {article.series_id && (
+            <>
+              <span className="article-card__sep">·</span>
+              <span className="article-card__series">📚 Series</span>
+            </>
+          )}
+          {readingTime && (
+            <>
+              <span className="article-card__sep">·</span>
+              <span className="article-card__reading-time">{readingTime} min</span>
+            </>
+          )}
         </div>
+        <h3 className="article-card__title">{article.title}</h3>
         {article.summary && (
           <p className="article-card__summary">{article.summary}</p>
+        )}
+        {tags.length > 0 && (
+          <div className="article-card__tags">
+            {tags.slice(0, 4).map(tag => (
+              <span key={tag} className="article-card__tag-pill">
+                {tag}
+              </span>
+            ))}
+            {tags.length > 4 && (
+              <span className="article-card__tag-pill article-card__tag-pill--more">
+                +{tags.length - 4}
+              </span>
+            )}
+          </div>
         )}
       </div>
     </Link>

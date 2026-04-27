@@ -7,6 +7,9 @@ CREATE TABLE IF NOT EXISTS articles (
   tags TEXT DEFAULT '[]',
   summary TEXT DEFAULT '',
   content TEXT NOT NULL,
+  series_id TEXT DEFAULT NULL,
+  series_order INTEGER DEFAULT NULL,
+  related_ids TEXT DEFAULT '[]',
   created_at TEXT DEFAULT (datetime('now')),
   updated_at TEXT DEFAULT (datetime('now'))
 );

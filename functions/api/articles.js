@@ -1,6 +1,51 @@
 // Cloudflare Pages Function — GET /api/articles
 // Lists all articles or a single article by ID
 
+// ── Tag Normalization ──────────────────────────────
+// Canonical casing for known acronyms and terms
+const ACRONYMS = new Set([
+  'llm', 'bert', 'gpt', 'gan', 'cnn', 'rnn', 'vae', 'dpo', 'ppo', 'rlhf',
+  'nlp', 'rag', 'lora', 'clip', 'vit', 'ai', 'ml', 'api', 'ssl', 'tf', 'idf',
+]);
+
+const KNOWN_FORMS = {
+  'chain-of-thought': 'Chain-of-Thought',
+  'in-context learning': 'In-Context Learning',
+  'self-supervised learning': 'Self-Supervised Learning',
+  'vision-language': 'Vision-Language',
+  'fine-tuning': 'Fine-Tuning',
+  'pre-training': 'Pre-Training',
+  'multi-task': 'Multi-Task',
+};
+
+function normalizeTag(tag) {
+  const trimmed = tag.trim();
+  if (!trimmed) return '';
+  const lower = trimmed.toLowerCase();
+
+  // Check known compound forms first
+  if (KNOWN_FORMS[lower]) return KNOWN_FORMS[lower];
+
+  // Check if it's a known acronym
+  if (ACRONYMS.has(lower)) return trimmed.toUpperCase();
+
+  // Default: Title Case (capitalize first letter of each word)
+  return lower.replace(/(?:^|\s|-)\S/g, c => c.toUpperCase());
+}
+
+function normalizeTags(tags) {
+  if (!Array.isArray(tags)) return [];
+  // Normalize and deduplicate (case-insensitive)
+  const seen = new Map();
+  for (const tag of tags) {
+    const normalized = normalizeTag(tag);
+    if (normalized && !seen.has(normalized.toLowerCase())) {
+      seen.set(normalized.toLowerCase(), normalized);
+    }
+  }
+  return [...seen.values()];
+}
+
 export async function onRequestGet(context) {
   const { env, request } = context;
   const url = new URL(request.url);
@@ -14,13 +59,14 @@ export async function onRequestGet(context) {
   try {
     // List all articles (ordered by date desc)
     const { results } = await env.DB.prepare(
-      'SELECT id, title, date, category, tags, summary, created_at FROM articles ORDER BY date DESC'
+      'SELECT id, title, date, category, tags, summary, series_id, series_order, related_ids, created_at FROM articles ORDER BY date DESC'
     ).all();
 
-    // Parse tags JSON string back to array
+    // Parse JSON string fields back to arrays
     const articles = results.map(a => ({
       ...a,
       tags: JSON.parse(a.tags || '[]'),
+      related_ids: JSON.parse(a.related_ids || '[]'),
     }));
 
     return new Response(JSON.stringify(articles), { headers });
@@ -43,7 +89,7 @@ export async function onRequestPost(context) {
 
   try {
     const body = await request.json();
-    const { title, category, tags, summary, content } = body;
+    const { title, category, tags, summary, content, series_id, series_order, related_ids } = body;
 
     if (!title || !content) {
       return new Response(JSON.stringify({ error: 'Title and content are required' }), {
@@ -54,11 +100,12 @@ export async function onRequestPost(context) {
 
     const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const date = new Date().toISOString().split('T')[0];
-    const tagsJson = JSON.stringify(tags || []);
+    const tagsJson = JSON.stringify(normalizeTags(tags || []));
+    const relatedJson = JSON.stringify(related_ids || []);
 
     await env.DB.prepare(
-      'INSERT INTO articles (id, title, date, category, tags, summary, content) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    ).bind(id, title, date, category || 'Knowledge', tagsJson, summary || '', content).run();
+      'INSERT INTO articles (id, title, date, category, tags, summary, content, series_id, series_order, related_ids) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ).bind(id, title, date, category || 'Knowledge', tagsJson, summary || '', content, series_id || null, series_order ?? null, relatedJson).run();
 
     return new Response(JSON.stringify({ id, title, date, category, tags }), {
       status: 201,
@@ -72,13 +119,4 @@ export async function onRequestPost(context) {
   }
 }
 
-// Handle CORS preflight
-export async function onRequestOptions() {
-  return new Response(null, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  });
-}
+// CORS preflight is handled by _middleware.js

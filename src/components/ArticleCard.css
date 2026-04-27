@@ -66,6 +66,40 @@
   overflow: hidden;
 }
 
+.article-card__series {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.article-card__tags {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.article-card__tag-pill {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border-light);
+  transition: all var(--transition-fast);
+}
+
+.article-card:hover .article-card__tag-pill {
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+}
+
+.article-card__tag-pill--more {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }

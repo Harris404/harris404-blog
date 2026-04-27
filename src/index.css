@@ -293,7 +293,37 @@ h4 { font-size: 1.1rem; }
   margin: 1.8em 0;
 }
 
+/* --- KaTeX Formula Styles --- */
+.markdown-body .katex-display {
+  margin: 1.8em 0;
+  padding: 1em 1.2em;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  overflow-x: auto;
+}
+
+.markdown-body .katex-display > .katex {
+  text-align: center;
+}
+
+.markdown-body .katex {
+  font-size: 1.05em;
+}
+
+.markdown-body p .katex {
+  padding: 0 2px;
+}
+
 /* Highlight.js */
 .hljs {
   background: var(--code-bg) !important;
+}
+
+/* --- Inline SVG in markdown --- */
+.markdown-body svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
 }

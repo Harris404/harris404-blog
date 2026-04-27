@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import useArticles from '../hooks/useArticles';
@@ -11,6 +11,31 @@ const ImageIcon = () => (
     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
     <circle cx="8.5" cy="8.5" r="1.5" />
     <polyline points="21 15 16 10 5 21" />
+  </svg>
+);
+
+const MermaidIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="8" y="2" width="8" height="5" rx="1" />
+    <rect x="2" y="17" width="7" height="5" rx="1" />
+    <rect x="15" y="17" width="7" height="5" rx="1" />
+    <line x1="12" y1="7" x2="12" y2="12" />
+    <line x1="12" y1="12" x2="5.5" y2="17" />
+    <line x1="12" y1="12" x2="18.5" y2="17" />
+  </svg>
+);
+
+const InteractiveIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="4" y1="21" x2="4" y2="14" />
+    <line x1="4" y1="10" x2="4" y2="3" />
+    <line x1="12" y1="21" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12" y2="3" />
+    <line x1="20" y1="21" x2="20" y2="16" />
+    <line x1="20" y1="12" x2="20" y2="3" />
+    <line x1="1" y1="14" x2="7" y2="14" />
+    <line x1="9" y1="8" x2="15" y2="8" />
+    <line x1="17" y1="16" x2="23" y2="16" />
   </svg>
 );
 
@@ -33,7 +58,89 @@ const CODE_LANGUAGES = [
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB
 
+const IMAGE_SIZES = [
+  { label: 'S', value: '300', title: '小 (300px)' },
+  { label: 'M', value: '500', title: '中 (500px)' },
+  { label: 'L', value: '700', title: '大 (700px)' },
+  { label: '100%', value: '100%', title: '全宽' },
+];
+
 const EMPTY_FORM = { title: '', category: 'Knowledge', tags: '', content: '' };
+
+// Predefined tag taxonomy for AI/ML content
+const TAG_TAXONOMY = [
+  // Architecture
+  'Transformer', 'Attention', 'CNN', 'RNN', 'GAN', 'Diffusion', 'VAE', 'Autoencoder',
+  // NLP / LLM
+  'LLM', 'BERT', 'GPT', 'Fine-Tuning', 'Tokenization', 'Embedding', 'Prompt Engineering',
+  // Training
+  'RLHF', 'DPO', 'PPO', 'Pre-training', 'Transfer Learning', 'Multi-Task',
+  // Techniques
+  'RAG', 'Agent', 'Chain-of-Thought', 'In-Context Learning', 'Quantization', 'Distillation', 'LoRA',
+  // Multimodal
+  'Multimodal', 'Vision-Language', 'CLIP', 'Image Generation', 'Speech',
+  // General ML
+  'Deep Learning', 'Machine Learning', 'Optimization', 'Loss Function', 'Regularization',
+  'Batch Normalization', 'Self-Supervised Learning', 'Contrastive Learning',
+  // Applications
+  'NLP', 'Computer Vision', 'Recommendation', 'Search', 'Code Generation',
+  // System
+  'Inference', 'Deployment', 'Distributed Training', 'Model Serving',
+  // Math
+  'Linear Algebra', 'Probability', 'Information Theory', 'Calculus',
+];
+
+/**
+ * Generate a smart summary from markdown content.
+ * Skips: headers (#), code blocks (```), empty lines, images, HTML tags.
+ * Returns the first real paragraph, max 180 chars.
+ */
+function generateSummary(content) {
+  if (!content) return '';
+  const lines = content.split('\n');
+  let inCodeBlock = false;
+  const textLines = [];
+
+  for (const line of lines) {
+    // Skip code blocks
+    if (line.trim().startsWith('```')) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+    if (inCodeBlock) continue;
+
+    const trimmed = line.trim();
+    // Skip headers, images, HTML tags, horizontal rules, empty lines
+    if (!trimmed) continue;
+    if (trimmed.startsWith('#')) continue;
+    if (trimmed.startsWith('![')) continue;
+    if (trimmed.startsWith('<')) continue;
+    if (trimmed.startsWith('---') || trimmed.startsWith('***')) continue;
+    if (trimmed.startsWith('|')) continue; // tables
+    if (trimmed.startsWith('> ')) continue; // blockquotes
+
+    // Clean markdown formatting
+    const cleaned = trimmed
+      .replace(/\*\*(.*?)\*\*/g, '$1')  // bold
+      .replace(/\*(.*?)\*/g, '$1')      // italic
+      .replace(/`(.*?)`/g, '$1')        // inline code
+      .replace(/\[(.*?)\]\(.*?\)/g, '$1') // links
+      .replace(/~~(.*?)~~/g, '$1')      // strikethrough
+      .trim();
+
+    if (cleaned.length > 10) {
+      textLines.push(cleaned);
+      // Get enough text for a good summary
+      if (textLines.join(' ').length >= 180) break;
+    }
+  }
+
+  const combined = textLines.join(' ').trim();
+  if (combined.length > 180) {
+    return combined.substring(0, 177) + '…';
+  }
+  return combined;
+}
 
 function loadDraft() {
   try {
@@ -47,7 +154,7 @@ function loadDraft() {
 export default function Write() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addArticle, updateArticle } = useArticles();
+  const { articles, addArticle, updateArticle } = useArticles();
   const { token } = useAuth();
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
@@ -72,6 +179,40 @@ export default function Write() {
   const [previewMode, setPreviewMode] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [imageSize, setImageSize] = useState('100%');
+  const [showTagSuggestions, setShowTagSuggestions] = useState(false);
+
+  // Build tag suggestions: combine taxonomy with existing article tags
+  const allKnownTags = useMemo(() => {
+    const fromArticles = articles.flatMap(a =>
+      Array.isArray(a.tags) ? a.tags : []
+    );
+    const combined = [...new Set([...TAG_TAXONOMY, ...fromArticles])];
+    return combined.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+  }, [articles]);
+
+  // Filter tag suggestions based on current input
+  const tagSuggestions = useMemo(() => {
+    const currentTags = form.tags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+    const lastTag = form.tags.split(',').pop()?.trim().toLowerCase() || '';
+
+    if (!lastTag || lastTag.length < 1) return [];
+
+    return allKnownTags
+      .filter(tag =>
+        tag.toLowerCase().includes(lastTag) &&
+        !currentTags.includes(tag.toLowerCase())
+      )
+      .slice(0, 8);
+  }, [form.tags, allKnownTags]);
+
+  const selectTagSuggestion = (tag) => {
+    const parts = form.tags.split(',');
+    parts[parts.length - 1] = ' ' + tag;
+    const newTags = parts.join(',') + ', ';
+    update('tags', newTags);
+    setShowTagSuggestions(false);
+  };
 
   const update = (field, value) => {
     const next = { ...form, [field]: value };
@@ -86,13 +227,15 @@ export default function Write() {
     if (!ta) return;
     const start = ta.selectionStart;
     const end = ta.selectionEnd;
+    const scrollTop = ta.scrollTop;
     const selected = form.content.substring(start, end);
     const newContent = form.content.substring(0, start) + before + selected + after + form.content.substring(end);
     update('content', newContent);
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       ta.focus();
+      ta.scrollTop = scrollTop;
       ta.setSelectionRange(start + before.length, start + before.length + selected.length);
-    }, 0);
+    });
   };
 
   // Insert text at current cursor position (no selection wrapping)
@@ -141,9 +284,10 @@ export default function Write() {
         throw new Error(data.error || 'Upload failed');
       }
 
-      // Insert markdown image at cursor
+      // Insert HTML img tag with size at cursor
       const altText = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
-      insertTextAtCursor(`\n![${altText}](${data.url})\n`);
+      const widthAttr = imageSize === '100%' ? 'width="100%"' : `width="${imageSize}"`;
+      insertTextAtCursor(`\n<img src="${data.url}" alt="${altText}" ${widthAttr} />\n`);
     } catch (err) {
       alert(`图片上传失败: ${err.message}`);
     } finally {
@@ -227,7 +371,9 @@ export default function Write() {
     }
 
     const tags = form.tags.split(',').map(t => t.trim()).filter(Boolean);
-    const summary = form.content.substring(0, 160).replace(/[#*`]/g, '').trim();
+
+    // Generate smart summary: skip headings, code blocks, and extract first real paragraph
+    const summary = generateSummary(form.content);
 
     if (isEditing) {
       // Update existing article — date updates to today
@@ -277,13 +423,30 @@ export default function Write() {
             <option value="Paper">Paper</option>
             <option value="Code">Code</option>
           </select>
-          <input
-            className="write-input"
-            type="text"
-            placeholder="Tags (comma separated)"
-            value={form.tags}
-            onChange={(e) => update('tags', e.target.value)}
-          />
+          <div className="write-tag-wrap">
+            <input
+              className="write-input"
+              type="text"
+              placeholder="Tags (comma separated, type to search)"
+              value={form.tags}
+              onChange={(e) => { update('tags', e.target.value); setShowTagSuggestions(true); }}
+              onFocus={() => setShowTagSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowTagSuggestions(false), 200)}
+            />
+            {showTagSuggestions && tagSuggestions.length > 0 && (
+              <div className="write-tag-suggestions">
+                {tagSuggestions.map(tag => (
+                  <button
+                    key={tag}
+                    className="write-tag-suggestion"
+                    onMouseDown={(e) => { e.preventDefault(); selectTagSuggestion(tag); }}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <button className="write-upload" onClick={() => fileInputRef.current.click()}>
             Upload .md
           </button>
@@ -325,19 +488,31 @@ export default function Write() {
           <span className="toolbar-sep" />
 
           <button onClick={() => insertAt('[', '](url)')} title="Link">Link</button>
-          <button
-            className={`toolbar-btn-img${uploading ? ' uploading' : ''}`}
-            onClick={() => imageInputRef.current?.click()}
-            disabled={uploading}
-            title="Upload Image"
-          >
-            {uploading ? (
-              <span className="upload-spinner" />
-            ) : (
-              <ImageIcon />
-            )}
-            {uploading ? 'Uploading…' : 'Img'}
-          </button>
+          <div className="toolbar-img-group">
+            <button
+              className={`toolbar-btn-img${uploading ? ' uploading' : ''}`}
+              onClick={() => imageInputRef.current?.click()}
+              disabled={uploading}
+              title="Upload Image"
+            >
+              {uploading ? (
+                <span className="upload-spinner" />
+              ) : (
+                <ImageIcon />
+              )}
+              {uploading ? 'Uploading…' : 'Img'}
+            </button>
+            <select
+              className="toolbar-img-size"
+              value={imageSize}
+              onChange={(e) => setImageSize(e.target.value)}
+              title="图片大小"
+            >
+              {IMAGE_SIZES.map(s => (
+                <option key={s.value} value={s.value}>{s.label}</option>
+              ))}
+            </select>
+          </div>
           <input
             ref={imageInputRef}
             type="file"
@@ -354,6 +529,32 @@ export default function Write() {
 
           <button onClick={() => insertAt('$', '$')} title="Inline Math">𝑥²</button>
           <button onClick={() => insertAt('\n$$\n', '\n$$\n')} title="Block Math">∑</button>
+
+          <span className="toolbar-sep" />
+
+          <button
+            onClick={() => insertAt('\n```mermaid\ngraph TD\n    A[Start] --> B[Step 1]\n    B --> C[Step 2]\n    C --> D[End]\n```\n')}
+            title="插入 Mermaid 流程图"
+          >
+            <MermaidIcon /> Mermaid
+          </button>
+          <button
+            onClick={() => insertAt(`\n\`\`\`interactive\n${JSON.stringify({
+              title: "交互式演示",
+              inputs: [
+                { id: "x", type: "slider", label: "参数 x", min: 0, max: 100, default: 50 },
+                { id: "enabled", type: "toggle", label: "开关", default: true }
+              ],
+              compute: "const val = enabled ? x * 2 : x; const result = { val, message: val > 100 ? '⚠️ 超过阈值' : '✅ 正常' };",
+              outputs: [
+                { type: "number", label: "计算结果", value: "result.val", precision: 0 },
+                { type: "text", value: "result.message", style: "result.val > 100 ? 'warning' : 'success'" }
+              ]
+            }, null, 2)}\n\`\`\`\n`)}
+            title="插入交互式演示组件"
+          >
+            <InteractiveIcon /> Interactive
+          </button>
         </div>
 
         <div className="write-toolbar__right">
@@ -396,7 +597,15 @@ export default function Write() {
           </>
         ) : (
           <div className="write-preview">
-            {form.content ? <MarkdownRenderer content={form.content} /> : <p className="write-empty">Nothing to preview yet</p>}
+            {form.content ? (
+              <MarkdownRenderer
+                content={form.content}
+                editable={true}
+                onContentChange={(newContent) => update('content', newContent)}
+              />
+            ) : (
+              <p className="write-empty">Nothing to preview yet</p>
+            )}
           </div>
         )}
       </div>

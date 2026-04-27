@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 460" font-family="'Inter', 'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <filter id="sh" x="-4%" y="-6%" width="108%" height="116%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.15"/>
+    </filter>
+    <marker id="a1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#374151"/>
+    </marker>
+    <marker id="aP" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#be185d"/>
+    </marker>
+  </defs>
+
+  <rect width="960" height="460" fill="#fff"/>
+
+  <text x="480" y="30" text-anchor="middle" fill="#111827" font-size="20" font-weight="800">LLaVA: Large Language-and-Vision Assistant</text>
+  <text x="480" y="50" text-anchor="middle" fill="#4b5563" font-size="12" font-weight="600">极致简洁：一个线性投影 W 连接视觉和语言</text>
+
+  <!-- Input Image -->
+  <rect x="25" y="85" width="75" height="70" rx="8" fill="#f3f4f6" stroke="#6b7280" stroke-width="2"/>
+  <text x="62" y="118" text-anchor="middle" fill="#111827" font-size="11" font-weight="600">图像</text>
+  <text x="62" y="138" text-anchor="middle" fill="#4b5563" font-size="11" font-weight="500">X_v</text>
+
+  <!-- ViT -->
+  <rect x="130" y="80" width="120" height="80" rx="10" fill="#4338ca" filter="url(#sh)"/>
+  <text x="190" y="110" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Vision Encoder</text>
+  <text x="190" y="128" text-anchor="middle" fill="#c7d2fe" font-size="10">CLIP ViT-L/14</text>
+  <text x="190" y="148" text-anchor="middle" fill="#e0e7ff" font-size="12" font-weight="700">❄️ 冻结</text>
+  <line x1="100" y1="120" x2="128" y2="120" stroke="#374151" stroke-width="2" marker-end="url(#a1)"/>
+
+  <!-- Z_v -->
+  <rect x="280" y="97" width="58" height="44" rx="6" fill="#eef2ff" stroke="#4338ca" stroke-width="2"/>
+  <text x="309" y="117" text-anchor="middle" fill="#3730a3" font-size="12" font-weight="700">Z_v</text>
+  <text x="309" y="134" text-anchor="middle" fill="#4338ca" font-size="9">视觉特征</text>
+  <line x1="250" y1="120" x2="278" y2="120" stroke="#374151" stroke-width="2" marker-end="url(#a1)"/>
+
+  <!-- W -->
+  <rect x="368" y="82" width="95" height="76" rx="12" fill="#ea580c" filter="url(#sh)"/>
+  <text x="415" y="112" text-anchor="middle" fill="#fff" font-size="22" font-weight="900">W</text>
+  <text x="415" y="132" text-anchor="middle" fill="#ffedd5" font-size="10" font-weight="700">线性投影 🔥</text>
+  <text x="415" y="148" text-anchor="middle" fill="#fed7aa" font-size="9" font-weight="600">H_v = W · Z_v</text>
+  <line x1="338" y1="120" x2="366" y2="120" stroke="#374151" stroke-width="2" marker-end="url(#a1)"/>
+
+  <!-- H_v -->
+  <rect x="490" y="97" width="62" height="44" rx="6" fill="#fff7ed" stroke="#c2410c" stroke-width="2"/>
+  <text x="521" y="117" text-anchor="middle" fill="#9a3412" font-size="12" font-weight="700">H_v</text>
+  <text x="521" y="134" text-anchor="middle" fill="#c2410c" font-size="9">Visual Tokens</text>
+  <line x1="463" y1="120" x2="488" y2="120" stroke="#374151" stroke-width="2" marker-end="url(#a1)"/>
+
+  <!-- Concat -->
+  <circle cx="580" cy="142" r="18" fill="#f3f4f6" stroke="#111827" stroke-width="2.5"/>
+  <text x="580" y="148" text-anchor="middle" fill="#111827" font-size="18" font-weight="900">⊕</text>
+  <text x="580" y="174" text-anchor="middle" fill="#374151" font-size="9" font-weight="600">拼接</text>
+  <line x1="552" y1="119" x2="565" y2="130" stroke="#374151" stroke-width="2" marker-end="url(#a1)"/>
+
+  <!-- Text -->
+  <rect x="490" y="190" width="95" height="42" rx="6" fill="#f3f4f6" stroke="#6b7280" stroke-width="2"/>
+  <text x="537" y="210" text-anchor="middle" fill="#111827" font-size="10" font-weight="600">文本指令 X_q</text>
+  <text x="537" y="225" text-anchor="middle" fill="#4b5563" font-size="9">H_q Text Tokens</text>
+  <line x1="565" y1="205" x2="572" y2="165" stroke="#374151" stroke-width="1.5" marker-end="url(#a1)"/>
+
+  <!-- LLM -->
+  <rect x="630" y="85" width="165" height="113" rx="12" fill="#be185d" filter="url(#sh)"/>
+  <text x="712" y="120" text-anchor="middle" fill="#fff" font-size="15" font-weight="800">Language Model</text>
+  <text x="712" y="142" text-anchor="middle" fill="#fce7f3" font-size="12" font-weight="600">Vicuna / LLaMA</text>
+  <text x="712" y="162" text-anchor="middle" fill="#fbcfe8" font-size="11">Stage 1: ❄️ → Stage 2: 🔥</text>
+  <text x="712" y="182" text-anchor="middle" fill="#f9a8d4" font-size="10" font-weight="600">（Stage 2 解冻微调!）</text>
+  <line x1="598" y1="142" x2="628" y2="142" stroke="#374151" stroke-width="2" marker-end="url(#a1)"/>
+
+  <!-- Output -->
+  <rect x="830" y="113" width="90" height="55" rx="8" fill="#fdf2f8" stroke="#be185d" stroke-width="3"/>
+  <text x="875" y="137" text-anchor="middle" fill="#9d174d" font-size="12" font-weight="800">X_a</text>
+  <text x="875" y="156" text-anchor="middle" fill="#be185d" font-size="10" font-weight="600">生成回答</text>
+  <line x1="795" y1="142" x2="828" y2="142" stroke="#be185d" stroke-width="2" marker-end="url(#aP)"/>
+
+  <!-- Stage 1 -->
+  <rect x="25" y="265" width="440" height="170" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2.5"/>
+  <text x="245" y="292" text-anchor="middle" fill="#065f46" font-size="15" font-weight="800">Stage 1: Feature Alignment</text>
+
+  <rect x="50" y="312" width="95" height="40" rx="6" fill="#eef2ff" stroke="#4338ca" stroke-width="2"/>
+  <text x="97" y="330" text-anchor="middle" fill="#3730a3" font-size="10" font-weight="700">Vision Enc ❄️</text>
+  <text x="97" y="345" text-anchor="middle" fill="#4338ca" font-size="9">冻结</text>
+
+  <rect x="170" y="312" width="65" height="40" rx="6" fill="#ea580c" filter="url(#sh)"/>
+  <text x="202" y="330" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">W 🔥</text>
+  <text x="202" y="345" text-anchor="middle" fill="#ffedd5" font-size="9">训练</text>
+
+  <rect x="260" y="312" width="95" height="40" rx="6" fill="#fdf2f8" stroke="#be185d" stroke-width="2"/>
+  <text x="307" y="330" text-anchor="middle" fill="#9d174d" font-size="10" font-weight="700">LLM ❄️</text>
+  <text x="307" y="345" text-anchor="middle" fill="#be185d" font-size="9">冻结</text>
+
+  <line x1="145" y1="332" x2="168" y2="332" stroke="#374151" stroke-width="1.5" marker-end="url(#a1)"/>
+  <line x1="235" y1="332" x2="258" y2="332" stroke="#374151" stroke-width="1.5" marker-end="url(#a1)"/>
+
+  <rect x="50" y="368" width="155" height="24" rx="5" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="127" y="384" text-anchor="middle" fill="#374151" font-size="10" font-weight="600">📊 CC3M 子集 ~595K</text>
+  <text x="245" y="418" text-anchor="middle" fill="#065f46" font-size="11" font-weight="700">只训练 W → 视觉↔语言 对齐</text>
+
+  <!-- Stage 2 -->
+  <rect x="490" y="265" width="440" height="170" rx="12" fill="#fdf2f8" stroke="#be185d" stroke-width="2.5"/>
+  <text x="710" y="292" text-anchor="middle" fill="#9d174d" font-size="15" font-weight="800">Stage 2: End-to-End Fine-tuning</text>
+
+  <rect x="515" y="312" width="95" height="40" rx="6" fill="#eef2ff" stroke="#4338ca" stroke-width="2"/>
+  <text x="562" y="330" text-anchor="middle" fill="#3730a3" font-size="10" font-weight="700">Vision Enc ❄️</text>
+  <text x="562" y="345" text-anchor="middle" fill="#4338ca" font-size="9">冻结</text>
+
+  <rect x="635" y="312" width="65" height="40" rx="6" fill="#ea580c" filter="url(#sh)"/>
+  <text x="667" y="330" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">W 🔥</text>
+  <text x="667" y="345" text-anchor="middle" fill="#ffedd5" font-size="9">训练</text>
+
+  <rect x="725" y="312" width="110" height="40" rx="6" fill="#be185d" filter="url(#sh)"/>
+  <text x="780" y="330" text-anchor="middle" fill="#fff" font-size="10" font-weight="800">LLM 🔥 解冻!</text>
+  <text x="780" y="345" text-anchor="middle" fill="#fce7f3" font-size="9">微调</text>
+
+  <line x1="610" y1="332" x2="633" y2="332" stroke="#374151" stroke-width="1.5" marker-end="url(#a1)"/>
+  <line x1="700" y1="332" x2="723" y2="332" stroke="#374151" stroke-width="1.5" marker-end="url(#a1)"/>
+
+  <rect x="515" y="368" width="180" height="24" rx="5" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="605" y="384" text-anchor="middle" fill="#374151" font-size="10" font-weight="600">📊 158K 指令数据 (GPT-4 生成)</text>
+  <text x="710" y="418" text-anchor="middle" fill="#9d174d" font-size="11" font-weight="700">W + LLM 一起训 → 指令跟随能力</text>
+
+  <!-- Arrow -->
+  <path d="M 450 360 Q 470 360 470 340 Q 470 320 488 320" stroke="#6d28d9" stroke-width="2.5" fill="none" stroke-dasharray="5,3" marker-end="url(#a1)"/>
+  <text x="470" y="380" text-anchor="middle" fill="#6d28d9" font-size="9" font-weight="700">迁移</text>
+</svg>
