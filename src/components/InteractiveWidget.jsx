@@ -25,7 +25,8 @@ function safeEval(code, vars) {
     const keys = Object.keys(vars);
     const values = Object.values(vars);
     // Create function with input variables as parameters
-    const fn = new Function(...keys, `"use strict"; ${code}; return typeof result !== 'undefined' ? result : {};`);
+    // Pre-declare `result` so compute code can assign to it in strict mode
+    const fn = new Function(...keys, `"use strict"; let result; ${code}; return typeof result !== 'undefined' ? result : {};`);
     return fn(...values);
   } catch (err) {
     return { _error: err.message };
