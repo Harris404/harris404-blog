@@ -389,30 +389,36 @@ export default function Write() {
     // Generate smart summary: skip headings, code blocks, and extract first real paragraph
     const summary = generateSummary(form.content);
 
-    if (isEditing) {
-      // Update existing article — date updates to today
-      await updateArticle(editArticle.id, {
-        title: form.title.trim(),
-        category: form.category,
-        tags,
-        content: form.content,
-        summary,
-        date: new Date().toISOString().split('T')[0],
-      }, token);
-      navigate(`/article/${editArticle.id}`);
-    } else {
-      // Create new article
-      const article = await addArticle({
-        title: form.title.trim(),
-        category: form.category,
-        tags,
-        content: form.content,
-        summary,
-      }, token);
-      localStorage.removeItem(DRAFT_KEY);
-      navigate(`/article/${article.id}`);
+    try {
+      if (isEditing) {
+        // Update existing article — date updates to today
+        await updateArticle(editArticle.id, {
+          title: form.title.trim(),
+          category: form.category,
+          tags,
+          content: form.content,
+          summary,
+          date: new Date().toISOString().split('T')[0],
+        }, token);
+        navigate(`/article/${editArticle.id}`);
+      } else {
+        // Create new article
+        const article = await addArticle({
+          title: form.title.trim(),
+          category: form.category,
+          tags,
+          content: form.content,
+          summary,
+        }, token);
+        localStorage.removeItem(DRAFT_KEY);
+        navigate(`/article/${article.id}`);
+      }
+    } catch (err) {
+      console.error('Publish failed:', err);
+      alert(`发布失败: ${err.message || '未知错误，请检查登录状态'}`);
     }
   };
+
 
   const [activeTab, setActiveTab] = useState('write');
   const [newSeriesName, setNewSeriesName] = useState('');

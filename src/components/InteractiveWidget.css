@@ -180,6 +180,48 @@
   cursor: pointer;
 }
 
+/* Stepper */
+.iw-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.iw-stepper__btn {
+  padding: 6px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.iw-stepper__btn:hover:not(:disabled) {
+  background: var(--border-light);
+  border-color: var(--accent);
+}
+
+.iw-stepper__btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.iw-stepper__btn--reset {
+  color: var(--text-muted);
+}
+
+.iw-stepper__info {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-left: 4px;
+}
+
 /* ─── Outputs ─────────────────────────── */
 .iw-outputs {
   padding: 14px 18px;

@@ -257,6 +257,26 @@ export default function InteractiveWidget({ config: rawConfig }) {
                   </select>
                 </>
               )}
+              {input.type === 'stepper' && (
+                <div className="iw-stepper">
+                  <button
+                    className="iw-stepper__btn"
+                    disabled={inputs[input.id] >= (input.max ?? 100)}
+                    onClick={() => updateInput(input.id, Math.min((inputs[input.id] || 0) + 1, input.max ?? 100))}
+                  >
+                    {input.nextLabel || 'Next iteration'}
+                  </button>
+                  <button
+                    className="iw-stepper__btn iw-stepper__btn--reset"
+                    onClick={() => updateInput(input.id, input.min ?? 0)}
+                  >
+                    {input.resetLabel || 'Reset'}
+                  </button>
+                  <span className="iw-stepper__info">
+                    {input.label}: {inputs[input.id]}{inputs[input.id] === (input.min ?? 0) ? ' (initial)' : inputs[input.id] >= 10 ? ' (converged)' : ''}
+                  </span>
+                </div>
+              )}
             </div>
           ))}
         </div>

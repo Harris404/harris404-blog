@@ -59,23 +59,22 @@ export function ArticlesProvider({ children }) {
     };
 
     if (useApiRef.current) {
-      try {
-        const res = await fetch(API_BASE, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify(newArticle),
-        });
-        if (res.ok) {
-          const created = await res.json();
-          setArticles(prev => [{ ...newArticle, ...created }, ...prev]);
-          return { ...newArticle, ...created };
-        }
-      } catch {
-        // fall through
+      const res = await fetch(API_BASE, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(newArticle),
+      });
+      if (res.ok) {
+        const created = await res.json();
+        setArticles(prev => [{ ...newArticle, ...created }, ...prev]);
+        return { ...newArticle, ...created };
       }
+      // Surface server errors instead of silently falling through
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || `Server error (${res.status})`);
     }
 
     setArticles(prev => {
