@@ -184,10 +184,12 @@ export default function MarkdownRenderer({ content, editable = false, onContentC
           },
           pre({ children, ...props }) {
             const child = Array.isArray(children) ? children[0] : children;
-            const className = child?.props?.className || '';
+            const rawClass = child?.props?.className || '';
+            // className can be a string or an array (depending on rehype version)
+            const className = Array.isArray(rawClass) ? rawClass.join(' ') : String(rawClass);
 
             // Interactive widget
-            if (className === 'language-interactive') {
+            if (className.includes('language-interactive')) {
               const code = typeof child.props.children === 'string'
                 ? child.props.children
                 : String(child.props.children || '');
@@ -195,7 +197,7 @@ export default function MarkdownRenderer({ content, editable = false, onContentC
             }
 
             // Mermaid diagram
-            if (className === 'language-mermaid') {
+            if (className.includes('language-mermaid')) {
               const code = typeof child.props.children === 'string'
                 ? child.props.children
                 : String(child.props.children || '');
@@ -203,7 +205,7 @@ export default function MarkdownRenderer({ content, editable = false, onContentC
             }
 
             // Architecture explorer
-            if (className === 'language-architecture') {
+            if (className.includes('language-architecture')) {
               return <ArchitectureExplorer />;
             }
 
