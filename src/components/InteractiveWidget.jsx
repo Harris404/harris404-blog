@@ -24,9 +24,14 @@ function safeEval(code, vars) {
   try {
     const keys = Object.keys(vars);
     const values = Object.values(vars);
-    // Create function with input variables as parameters
-    // Pre-declare `result` so compute code can assign to it in strict mode
-    const fn = new Function(...keys, `"use strict"; let result; ${code}; return typeof result !== 'undefined' ? result : {};`);
+    // Support two compute code patterns:
+    //   1) bare `result = {...}` — assigns to outer `var result`
+    //   2) `const result = {...}` — block-scoped, shadows outer `var result`
+    // `var result` is needed for pattern 1; the block `{}` isolates pattern 2.
+    // After user code, `__result = result` captures whichever `result` is in scope.
+    const fn = new Function(...keys,
+      `"use strict"; var result; var __result; { ${code}; __result = result; } return __result || {};`
+    );
     return fn(...values);
   } catch (err) {
     return { _error: err.message };
