@@ -119,12 +119,7 @@ export function ArticlesProvider({ children }) {
   const getArticle = useCallback(async (id) => {
     if (articleCacheRef.current[id]) return articleCacheRef.current[id];
 
-    const local = articlesRef.current.find(a => a.id === id);
-    if (local && local.content) {
-      articleCacheRef.current[id] = local;
-      return local;
-    }
-
+    // Always try API first to get the freshest data (with related articles, series, etc.)
     if (useApiRef.current) {
       try {
         const res = await fetch(`${API_BASE}/${id}`);
@@ -134,6 +129,13 @@ export function ArticlesProvider({ children }) {
           return article;
         }
       } catch { /* fall through */ }
+    }
+
+    // Fallback to local state
+    const local = articlesRef.current.find(a => a.id === id);
+    if (local && local.content) {
+      articleCacheRef.current[id] = local;
+      return local;
     }
 
     const sample = sampleArticles.find(a => a.id === id);
@@ -166,22 +168,22 @@ export function ArticlesProvider({ children }) {
     const updatedDate = articleData.date || new Date().toISOString().split('T')[0];
 
     if (useApiRef.current) {
-      try {
-        await fetch(`${API_BASE}/${id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({ ...articleData, date: updatedDate }),
-        });
-      } catch {
-        // fall through
+      const res = await fetch(`${API_BASE}/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ ...articleData, date: updatedDate }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Update failed (${res.status})`);
       }
     }
 
-    // Clear cache so next fetch gets fresh data
-    delete articleCacheRef.current[id];
+    // Clear entire cache so next getArticle fetches fresh data from API
+    articleCacheRef.current = {};
 
     // Update local state and re-sort by date DESC
     setArticles(prev => {

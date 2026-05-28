@@ -169,7 +169,7 @@ export default function Write() {
   const navigate = useNavigate();
   const location = useLocation();
   const { articles, addArticle, updateArticle, refreshArticles } = useArticles();
-  const { token } = useAuth();
+  const { token, handleApiError } = useAuth();
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
   const textareaRef = useRef(null);
@@ -303,11 +303,15 @@ export default function Write() {
       const widthAttr = imageSize === '100%' ? 'width="100%"' : `width="${imageSize}"`;
       insertTextAtCursor(`\n<img src="${data.url}" alt="${altText}" ${widthAttr} />\n`);
     } catch (err) {
-      alert(`图片上传失败: ${err.message}`);
+      if (handleApiError(err)) {
+        alert('登录已过期，请重新登录后再上传图片。');
+      } else {
+        alert(`图片上传失败: ${err.message}`);
+      }
     } finally {
       setUploading(false);
     }
-  }, [token, form.content]);
+  }, [token, form.content, handleApiError]);
 
   // Handle image file input change
   const handleImageUpload = (e) => {
@@ -415,6 +419,10 @@ export default function Write() {
       }
     } catch (err) {
       console.error('Publish failed:', err);
+      if (handleApiError(err)) {
+        alert('登录已过期，请重新登录后再发布。草稿已保留。');
+        return;
+      }
       alert(`发布失败: ${err.message || '未知错误，请检查登录状态'}`);
     }
   };

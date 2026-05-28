@@ -1,11 +1,53 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
 const TOKEN_KEY = 'blog-admin-token';
+const TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // must match functions/api/_middleware.js
+
+function readTokenTimestamp(token) {
+  try {
+    const decoded = atob(token);
+    const parts = decoded.split(':');
+    if (parts.length < 3 || parts[0] !== 'admin') return null;
+    const ts = Number(parts[1]);
+    return Number.isFinite(ts) ? ts : null;
+  } catch {
+    return null;
+  }
+}
+
+function loadValidToken() {
+  const stored = localStorage.getItem(TOKEN_KEY);
+  if (!stored) return null;
+  const ts = readTokenTimestamp(stored);
+  if (ts === null || Date.now() - ts > TOKEN_TTL_MS) {
+    localStorage.removeItem(TOKEN_KEY);
+    return null;
+  }
+  return stored;
+}
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY) || null);
+  const [token, setToken] = useState(loadValidToken);
+
+  // Re-check on mount in case the tab sat idle past the TTL.
+  useEffect(() => {
+    if (!token) return;
+    const ts = readTokenTimestamp(token);
+    if (ts === null) return;
+    const remaining = TOKEN_TTL_MS - (Date.now() - ts);
+    if (remaining <= 0) {
+      setToken(null);
+      localStorage.removeItem(TOKEN_KEY);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setToken(null);
+      localStorage.removeItem(TOKEN_KEY);
+    }, remaining);
+    return () => clearTimeout(timer);
+  }, [token]);
 
   const login = useCallback(async (password) => {
     try {
@@ -33,10 +75,22 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(TOKEN_KEY);
   }, []);
 
+  // Helper: detect 401-equivalent failures coming back from the API and
+  // tear down the local session so the UI stops pretending we're logged in.
+  const handleApiError = useCallback((err) => {
+    const msg = String(err?.message || err || '');
+    if (/token expired/i.test(msg) || /unauthorized/i.test(msg)) {
+      setToken(null);
+      localStorage.removeItem(TOKEN_KEY);
+      return true;
+    }
+    return false;
+  }, []);
+
   const isAdmin = !!token;
 
   return (
-    <AuthContext.Provider value={{ token, isAdmin, login, logout }}>
+    <AuthContext.Provider value={{ token, isAdmin, login, logout, handleApiError }}>
       {children}
     </AuthContext.Provider>
   );
