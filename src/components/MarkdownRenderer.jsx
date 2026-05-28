@@ -28,11 +28,20 @@ const rehypePluginsArray = [
  * rejects. We replace them with placeholder divs, then inject the
  * original SVG HTML via DOM manipulation in useEffect (NOT via
  * React component overrides, which caused scroll-blocking bugs).
+ *
+ * Also unwraps fenced ```svg ... ``` blocks first — without this step
+ * they'd be rendered as syntax-highlighted source instead of as figures.
  */
 function extractSvgBlocks(markdown) {
   const svgMap = new Map();
   let counter = 0;
-  const processed = markdown.replace(/<svg[\s\S]*?<\/svg>/gi, (match) => {
+
+  const unfenced = markdown.replace(
+    /```svg\s*\r?\n([\s\S]*?)\r?\n```/gi,
+    (_, body) => body.trim()
+  );
+
+  const processed = unfenced.replace(/<svg[\s\S]*?<\/svg>/gi, (match) => {
     const id = `svg-placeholder-${counter++}`;
     svgMap.set(id, match);
     return `<div data-svg-placeholder="${id}"></div>`;
