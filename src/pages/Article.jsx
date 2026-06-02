@@ -26,7 +26,7 @@ function formatViews(n) {
 export default function Article() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getArticle, deleteArticle } = useArticles();
+  const { getArticle, deleteArticle, seriesMeta } = useArticles();
   const { isAdmin, token } = useAuth();
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -229,11 +229,15 @@ export default function Article() {
                   seriesArticles={article.series_articles}
                   currentId={article.id}
                   seriesId={article.series_id}
+                  seriesName={seriesMeta[article.series_id]?.name}
+                  seriesIcon={seriesMeta[article.series_id]?.icon}
                 />
               : <SeriesNav
                   seriesArticles={article.series_articles}
                   currentId={article.id}
                   seriesId={article.series_id}
+                  seriesName={seriesMeta[article.series_id]?.name}
+                  seriesIcon={seriesMeta[article.series_id]?.icon}
                 />
           )}
 

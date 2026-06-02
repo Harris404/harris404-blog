@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import './SeriesNav.css';
 
-export default function SeriesNav({ seriesArticles, currentId, seriesId }) {
+export default function SeriesNav({ seriesArticles, currentId, seriesId, seriesName, seriesIcon }) {
   if (!seriesArticles || seriesArticles.length < 2) return null;
 
   const sorted = [...seriesArticles].sort((a, b) => (a.series_order || 0) - (b.series_order || 0));
@@ -12,8 +12,8 @@ export default function SeriesNav({ seriesArticles, currentId, seriesId }) {
   return (
     <div className="series-nav">
       <div className="series-nav__header">
-        <span className="series-nav__badge">📚 系列文章</span>
-        <span className="series-nav__label">{seriesId}</span>
+        <span className="series-nav__badge">{seriesIcon || '📚'} 系列文章</span>
+        <span className="series-nav__label">{seriesName || seriesId}</span>
         <span className="series-nav__count">{currentIdx + 1} / {sorted.length}</span>
       </div>
 

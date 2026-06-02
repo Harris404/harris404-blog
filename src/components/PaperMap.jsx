@@ -24,7 +24,7 @@ function estimateReadTime(summary) {
   return `~${Math.max(1, Math.ceil(words / 50))} min`;
 }
 
-export default function PaperMap({ seriesArticles, currentId, seriesId }) {
+export default function PaperMap({ seriesArticles, currentId, seriesId, seriesName, seriesIcon }) {
   if (!seriesArticles || seriesArticles.length < 2) return null;
 
   const [readIds, setReadIds] = useState(getReadArticles);
@@ -46,9 +46,9 @@ export default function PaperMap({ seriesArticles, currentId, seriesId }) {
   return (
     <div className="paper-map">
       <div className="paper-map__header">
-        <span className="paper-map__icon">🗺️</span>
+        <span className="paper-map__icon">{seriesIcon || '🗺️'}</span>
         <div className="paper-map__meta">
-          <h3 className="paper-map__title">论文路线图 · {seriesId}</h3>
+          <h3 className="paper-map__title">{seriesName || seriesId}</h3>
           <div className="paper-map__progress-wrap">
             <div className="paper-map__progress-bar">
               <div className="paper-map__progress-fill" style={{ width: `${progress}%` }} />
