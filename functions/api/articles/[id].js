@@ -1,6 +1,15 @@
 // Cloudflare Pages Function — /api/articles/[id]
 // GET single article, PUT update, DELETE remove
 
+import { verifyToken } from '../_token.js';
+
+async function isAdmin(request, env) {
+  const auth = request.headers.get('Authorization') || '';
+  if (!auth.startsWith('Bearer ')) return false;
+  const res = await verifyToken(auth.slice(7), env);
+  return res.valid === true;
+}
+
 // ─── Content Similarity Engine ────────────────────────────────
 
 const STOPWORDS = new Set([
@@ -163,7 +172,7 @@ function normalizeTags(tags) {
 // ─── API Handler ──────────────────────────────────────────────
 
 export async function onRequestGet(context) {
-  const { env, params } = context;
+  const { env, params, request } = context;
   const { id } = params;
 
   const headers = {
@@ -183,13 +192,35 @@ export async function onRequestGet(context) {
       });
     }
 
+    const admin = await isAdmin(request, env);
+
+    // Private articles are only readable by an authenticated admin — otherwise
+    // behave exactly like "not found" so their existence isn't leaked.
+    if (article.is_public === 0 && !admin) {
+      return new Response(JSON.stringify({ error: 'Article not found' }), {
+        status: 404,
+        headers,
+      });
+    }
+
+    // Count public reads only (don't inflate on the author's own views).
+    if (!admin) {
+      try {
+        await env.DB.prepare('UPDATE articles SET views = views + 1 WHERE id = ?').bind(id).run();
+        article.views = (article.views || 0) + 1;
+      } catch { /* counting is best-effort */ }
+    }
+
+    article.is_public = article.is_public !== 0;
     article.tags = JSON.parse(article.tags || '[]');
     article.related_ids = JSON.parse(article.related_ids || '[]');
+
+    const visFilter = admin ? '' : 'AND is_public = 1';
 
     // If article is part of a series, fetch all articles in the same series
     if (article.series_id) {
       const { results: seriesResults } = await env.DB.prepare(
-        'SELECT id, title, series_order FROM articles WHERE series_id = ? ORDER BY series_order ASC'
+        `SELECT id, title, series_order FROM articles WHERE series_id = ? ${visFilter} ORDER BY series_order ASC`
       ).bind(article.series_id).all();
       article.series_articles = seriesResults || [];
     }
@@ -198,7 +229,7 @@ export async function onRequestGet(context) {
     try {
       // Fetch all other articles with enough data for similarity scoring
       const { results: allArticles } = await env.DB.prepare(
-        'SELECT id, title, category, summary, tags, content, series_id FROM articles WHERE id != ? ORDER BY date DESC LIMIT 100'
+        `SELECT id, title, category, summary, tags, content, series_id FROM articles WHERE id != ? ${visFilter} ORDER BY date DESC LIMIT 100`
       ).bind(id).all();
 
       if (allArticles && allArticles.length > 0) {
@@ -252,7 +283,7 @@ export async function onRequestGet(context) {
     } catch (simErr) {
       // Fallback: simple same-category
       const { results: autoRelated } = await env.DB.prepare(
-        'SELECT id, title, category, summary FROM articles WHERE category = ? AND id != ? ORDER BY date DESC LIMIT 3'
+        `SELECT id, title, category, summary FROM articles WHERE category = ? AND id != ? ${visFilter} ORDER BY date DESC LIMIT 3`
       ).bind(article.category, id).all();
       article.related_articles = autoRelated || [];
     }
@@ -277,7 +308,7 @@ export async function onRequestPut(context) {
 
   try {
     const body = await request.json();
-    const { title, category, tags, summary, content, date, series_id, series_order, related_ids } = body;
+    const { title, category, tags, summary, content, date, series_id, series_order, related_ids, is_public } = body;
 
     // Dynamically build SET clauses — only update fields that were explicitly provided
     const setClauses = [];
@@ -298,6 +329,7 @@ export async function onRequestPut(context) {
     // series_id and series_order can be explicitly set to null (to clear them)
     if ('series_id' in body) { setClauses.push('series_id = ?'); bindValues.push(series_id ?? null); }
     if ('series_order' in body) { setClauses.push('series_order = ?'); bindValues.push(series_order ?? null); }
+    if (is_public !== undefined) { setClauses.push('is_public = ?'); bindValues.push(is_public === false ? 0 : 1); }
 
     if (setClauses.length === 0) {
       return new Response(JSON.stringify({ error: 'No fields to update' }), {

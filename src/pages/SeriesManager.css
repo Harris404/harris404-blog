@@ -68,6 +68,19 @@
 
 .sm-input:focus { border-color: var(--accent); }
 
+.sm-meta-edit {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 12px 0 4px;
+}
+.sm-input--icon {
+  flex: 0 0 56px;
+  width: 56px;
+  text-align: center;
+  font-size: 1.05rem;
+}
+
 .sm-empty {
   font-size: 0.82rem;
   color: var(--text-muted);

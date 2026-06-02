@@ -49,8 +49,9 @@ export async function onRequest(context) {
 
   let row;
   try {
+    // Only public articles get server-injected meta — never leak private ones.
     row = await env.DB
-      .prepare('SELECT title, summary, content FROM articles WHERE id = ?')
+      .prepare('SELECT title, summary, content FROM articles WHERE id = ? AND is_public = 1')
       .bind(id)
       .first();
   } catch {

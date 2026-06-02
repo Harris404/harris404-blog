@@ -10,6 +10,17 @@ CREATE TABLE IF NOT EXISTS articles (
   series_id TEXT DEFAULT NULL,
   series_order INTEGER DEFAULT NULL,
   related_ids TEXT DEFAULT '[]',
+  is_public INTEGER NOT NULL DEFAULT 1,   -- 1 = public, 0 = private (admin-only)
+  views INTEGER NOT NULL DEFAULT 0,       -- public page-view counter
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+-- Series metadata (name + icon). articles.series_id references series.id.
+CREATE TABLE IF NOT EXISTS series (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  icon TEXT DEFAULT '📚',
   created_at TEXT DEFAULT (datetime('now')),
   updated_at TEXT DEFAULT (datetime('now'))
 );

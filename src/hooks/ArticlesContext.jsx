@@ -4,17 +4,28 @@ import sampleArticles from '../data/articles';
 const ArticlesContext = createContext(null);
 
 const API_BASE = '/api/articles';
+const SERIES_API = '/api/series';
 const STORAGE_KEY = 'blog-articles';
+const TOKEN_KEY = 'blog-admin-token';
+
+// Read the admin token (if any) so list/detail fetches can include private
+// articles when the author is logged in. Kept decoupled from useAuth so the
+// data layer doesn't depend on the auth provider.
+function authHeaders() {
+  const t = localStorage.getItem(TOKEN_KEY);
+  return t ? { Authorization: `Bearer ${t}` } : {};
+}
 
 export function ArticlesProvider({ children }) {
   const [articles, setArticles] = useState([]);
+  const [seriesMeta, setSeriesMeta] = useState({});
   const [loading, setLoading] = useState(true);
   const useApiRef = useRef(true);
   const articleCacheRef = useRef({});
 
   const fetchArticles = useCallback(async () => {
     try {
-      const res = await fetch(API_BASE);
+      const res = await fetch(API_BASE, { headers: authHeaders() });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
@@ -41,9 +52,38 @@ export function ArticlesProvider({ children }) {
     setLoading(false);
   }, []);
 
+  const fetchSeriesMeta = useCallback(async () => {
+    try {
+      const res = await fetch(SERIES_API);
+      if (res.ok) {
+        const rows = await res.json();
+        if (Array.isArray(rows)) {
+          const map = {};
+          rows.forEach(r => { map[r.id] = { name: r.name, icon: r.icon }; });
+          setSeriesMeta(map);
+        }
+      }
+    } catch { /* series meta is optional */ }
+  }, []);
+
   useEffect(() => {
     fetchArticles();
-  }, [fetchArticles]);
+    fetchSeriesMeta();
+  }, [fetchArticles, fetchSeriesMeta]);
+
+  // Update (or create) a series's display name / icon.
+  const updateSeries = useCallback(async (id, meta, token) => {
+    const res = await fetch(`${SERIES_API}/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify(meta),
+    });
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      throw new Error(e.error || `Update failed (${res.status})`);
+    }
+    setSeriesMeta(prev => ({ ...prev, [id]: { ...prev[id], ...meta } }));
+  }, []);
 
   // Expose a refresh function so consumers can re-fetch after mutations
   const refreshArticles = useCallback(() => {
@@ -122,7 +162,7 @@ export function ArticlesProvider({ children }) {
     // Always try API first to get the freshest data (with related articles, series, etc.)
     if (useApiRef.current) {
       try {
-        const res = await fetch(`${API_BASE}/${id}`);
+        const res = await fetch(`${API_BASE}/${id}`, { headers: authHeaders() });
         if (res.ok) {
           const article = await res.json();
           articleCacheRef.current[id] = article;
@@ -197,7 +237,7 @@ export function ArticlesProvider({ children }) {
   const value = {
     articles, loading, addArticle, updateArticle,
     deleteArticle, getArticle, getByCategory, getGroupedByYear,
-    refreshArticles,
+    refreshArticles, seriesMeta, updateSeries, fetchSeriesMeta,
   };
 
   return (

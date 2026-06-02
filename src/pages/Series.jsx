@@ -16,7 +16,7 @@ function generateSeriesDesc(items) {
 }
 
 export default function Series() {
-  const { articles, loading } = useArticles();
+  const { articles, loading, seriesMeta } = useArticles();
 
   // Build series map from articles
   const seriesMap = {};
@@ -58,11 +58,12 @@ export default function Series() {
           {seriesKeys.map(key => {
             const items = seriesMap[key];
             const desc = generateSeriesDesc(items);
+            const meta = seriesMeta[key] || {};
             return (
               <Link key={key} to={`/series/${key}`} className="series-card">
-                <div className="series-card__icon">📚</div>
+                <div className="series-card__icon">{meta.icon || '📚'}</div>
                 <div className="series-card__body">
-                  <h3 className="series-card__title">{key}</h3>
+                  <h3 className="series-card__title">{meta.name || key}</h3>
                   <p className="series-card__count">{items.length} {items.length === 1 ? 'note' : 'notes'}</p>
                   {desc && (
                     <p className="series-card__summary">{desc}</p>

@@ -1,6 +1,16 @@
 // Cloudflare Pages Function — GET /api/articles
 // Lists all articles or a single article by ID
 
+import { verifyToken } from './_token.js';
+
+// True only when the request carries a valid admin token.
+async function isAdmin(request, env) {
+  const auth = request.headers.get('Authorization') || '';
+  if (!auth.startsWith('Bearer ')) return false;
+  const res = await verifyToken(auth.slice(7), env);
+  return res.valid === true;
+}
+
 // ── Tag Normalization ──────────────────────────────
 // Canonical casing for known acronyms and terms
 const ACRONYMS = new Set([
@@ -57,9 +67,12 @@ export async function onRequestGet(context) {
   };
 
   try {
-    // List all articles (ordered by date desc)
+    // Private articles are visible only to an authenticated admin.
+    const admin = await isAdmin(request, env);
+    const where = admin ? '' : 'WHERE is_public = 1';
+
     const { results } = await env.DB.prepare(
-      'SELECT id, title, date, category, tags, summary, series_id, series_order, related_ids, created_at FROM articles ORDER BY date DESC'
+      `SELECT id, title, date, category, tags, summary, series_id, series_order, related_ids, is_public, views, created_at FROM articles ${where} ORDER BY date DESC`
     ).all();
 
     // Parse JSON string fields back to arrays
@@ -67,6 +80,7 @@ export async function onRequestGet(context) {
       ...a,
       tags: JSON.parse(a.tags || '[]'),
       related_ids: JSON.parse(a.related_ids || '[]'),
+      is_public: a.is_public !== 0,
     }));
 
     return new Response(JSON.stringify(articles), { headers });
@@ -89,7 +103,7 @@ export async function onRequestPost(context) {
 
   try {
     const body = await request.json();
-    const { title, category, tags, summary, content, series_id, series_order, related_ids } = body;
+    const { title, category, tags, summary, content, series_id, series_order, related_ids, is_public } = body;
 
     if (!title || !content) {
       return new Response(JSON.stringify({ error: 'Title and content are required' }), {
@@ -102,12 +116,13 @@ export async function onRequestPost(context) {
     const date = new Date().toISOString().split('T')[0];
     const tagsJson = JSON.stringify(normalizeTags(tags || []));
     const relatedJson = JSON.stringify(related_ids || []);
+    const pub = is_public === false ? 0 : 1; // default public
 
     await env.DB.prepare(
-      'INSERT INTO articles (id, title, date, category, tags, summary, content, series_id, series_order, related_ids) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-    ).bind(id, title, date, category || 'Knowledge', tagsJson, summary || '', content, series_id || null, series_order ?? null, relatedJson).run();
+      'INSERT INTO articles (id, title, date, category, tags, summary, content, series_id, series_order, related_ids, is_public) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ).bind(id, title, date, category || 'Knowledge', tagsJson, summary || '', content, series_id || null, series_order ?? null, relatedJson, pub).run();
 
-    return new Response(JSON.stringify({ id, title, date, category, tags }), {
+    return new Response(JSON.stringify({ id, title, date, category, tags, is_public: pub === 1 }), {
       status: 201,
       headers,
     });

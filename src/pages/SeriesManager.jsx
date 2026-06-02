@@ -7,7 +7,7 @@ import './SeriesManager.css';
 const API_BASE = '/api/articles';
 
 export default function SeriesManager() {
-  const { articles, loading } = useArticles();
+  const { articles, loading, seriesMeta, updateSeries } = useArticles();
   const { token } = useAuth();
   const navigate = useNavigate();
 
@@ -17,6 +17,34 @@ export default function SeriesManager() {
   const [newSeriesName, setNewSeriesName] = useState('');
   const [saving, setSaving] = useState(false);
   const [dragIdx, setDragIdx] = useState(null);
+
+  // Editable name + icon for the active series
+  const [editName, setEditName] = useState('');
+  const [editIcon, setEditIcon] = useState('📚');
+  const [metaSaved, setMetaSaved] = useState(false);
+
+  // When the active series changes, seed the edit fields from its metadata.
+  useEffect(() => {
+    if (!activeSeries) return;
+    const m = seriesMeta[activeSeries] || {};
+    setEditName(m.name || activeSeries);
+    setEditIcon(m.icon || '📚');
+    setMetaSaved(false);
+  }, [activeSeries, seriesMeta]);
+
+  const handleSaveMeta = async () => {
+    if (!activeSeries) return;
+    setSaving(true);
+    try {
+      await updateSeries(activeSeries, { name: editName.trim() || activeSeries, icon: editIcon || '📚' }, token);
+      setMetaSaved(true);
+      setTimeout(() => setMetaSaved(false), 2000);
+    } catch (err) {
+      console.error('Failed to save series meta:', err);
+      alert('保存失败：' + (err.message || ''));
+    }
+    setSaving(false);
+  };
 
   // Build series map from articles
   useEffect(() => {
@@ -214,7 +242,7 @@ export default function SeriesManager() {
               className={`sm-series-chip ${activeSeries === key ? 'sm-series-chip--active' : ''}`}
               onClick={() => setActiveSeries(key)}
             >
-              📚 {key}
+              {(seriesMeta[key]?.icon) || '📚'} {(seriesMeta[key]?.name) || key}
               <span className="sm-series-chip__count">{seriesMap[key].length}</span>
             </button>
           ))}
@@ -227,10 +255,33 @@ export default function SeriesManager() {
           <div className="sm-section">
             <div className="sm-section__header">
               <h3 className="sm-section__title">
-                📚 {activeSeries}
+                {editIcon || '📚'} {editName || activeSeries}
                 {saving && <span className="sm-saving">保存中...</span>}
               </h3>
               <button className="sm-btn sm-btn--danger" onClick={deleteSeries}>删除系列</button>
+            </div>
+
+            {/* Rename + icon */}
+            <div className="sm-meta-edit">
+              <input
+                className="sm-input sm-input--icon"
+                type="text"
+                maxLength={4}
+                value={editIcon}
+                onChange={(e) => setEditIcon(e.target.value)}
+                placeholder="📚"
+                title="Emoji 图标"
+              />
+              <input
+                className="sm-input"
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="系列显示名称"
+              />
+              <button className="sm-btn sm-btn--primary" onClick={handleSaveMeta} disabled={saving}>
+                {metaSaved ? '✓ 已保存' : '保存名称/图标'}
+              </button>
             </div>
 
             {seriesArticles.length === 0 ? (

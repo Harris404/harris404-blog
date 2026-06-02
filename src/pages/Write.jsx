@@ -168,7 +168,7 @@ function loadDraft() {
 export default function Write() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { articles, addArticle, updateArticle, refreshArticles } = useArticles();
+  const { articles, addArticle, updateArticle, refreshArticles, fetchSeriesMeta } = useArticles();
   const { token, handleApiError } = useAuth();
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
@@ -189,6 +189,12 @@ export default function Write() {
     }
     return loadDraft();
   });
+
+  // Visibility: public (default) vs private (admin-only). Kept separate from
+  // `form` so it isn't persisted into the autosaved draft as a content field.
+  const [isPublic, setIsPublic] = useState(
+    editArticle ? editArticle.is_public !== false : true
+  );
 
   const [previewMode, setPreviewMode] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -402,6 +408,7 @@ export default function Write() {
           tags,
           content: form.content,
           summary,
+          is_public: isPublic,
           date: new Date().toISOString().split('T')[0],
         }, token);
         navigate(`/article/${editArticle.id}`);
@@ -413,6 +420,7 @@ export default function Write() {
           tags,
           content: form.content,
           summary,
+          is_public: isPublic,
         }, token);
         localStorage.removeItem(DRAFT_KEY);
         navigate(`/article/${article.id}`);
@@ -430,6 +438,7 @@ export default function Write() {
 
   const [activeTab, setActiveTab] = useState('write');
   const [newSeriesName, setNewSeriesName] = useState('');
+  const [newSeriesIcon, setNewSeriesIcon] = useState('📚');
   const [seriesItems, setSeriesItems] = useState([]);
   const [seriesSaving, setSeriesSaving] = useState(false);
   const [seriesCreated, setSeriesCreated] = useState(null);
@@ -477,6 +486,16 @@ export default function Write() {
 
     setSeriesSaving(true);
     try {
+      // Save the series metadata (display name + icon) …
+      await fetch('/api/series', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ id: seriesId, name, icon: newSeriesIcon || '📚' }),
+      });
+      // … then assign the chosen articles to it.
       await Promise.all(seriesItems.map((a, i) =>
         fetch(`/api/articles/${a.id}`, {
           method: 'PUT',
@@ -488,8 +507,10 @@ export default function Write() {
         })
       ));
       if (refreshArticles) refreshArticles();
+      if (fetchSeriesMeta) fetchSeriesMeta();
       setSeriesCreated(seriesId);
       setNewSeriesName('');
+      setNewSeriesIcon('📚');
       setSeriesItems([]);
     } catch (err) {
       console.error('Failed to create series:', err);
@@ -531,16 +552,27 @@ export default function Write() {
             </div>
           )}
 
-          {/* Name input */}
+          {/* Name + icon input */}
           <div className="sc-section">
-            <label className="sc-label">Series Name</label>
-            <input
-              className="sc-input"
-              type="text"
-              placeholder="e.g. Transformer 系列"
-              value={newSeriesName}
-              onChange={(e) => setNewSeriesName(e.target.value)}
-            />
+            <label className="sc-label">Series Name &amp; Icon</label>
+            <div className="sc-name-row">
+              <input
+                className="sc-input sc-input--icon"
+                type="text"
+                placeholder="📚"
+                maxLength={4}
+                value={newSeriesIcon}
+                onChange={(e) => setNewSeriesIcon(e.target.value)}
+                title="Emoji 图标"
+              />
+              <input
+                className="sc-input"
+                type="text"
+                placeholder="e.g. Transformer 系列"
+                value={newSeriesName}
+                onChange={(e) => setNewSeriesName(e.target.value)}
+              />
+            </div>
           </div>
 
           {/* Selected articles (ordered) */}
@@ -655,6 +687,14 @@ export default function Write() {
             Upload .md
           </button>
           <input ref={fileInputRef} type="file" accept=".md,.markdown,.txt" style={{ display: 'none' }} onChange={handleFileUpload} />
+          <button
+            type="button"
+            className={`write-visibility write-visibility--${isPublic ? 'public' : 'private'}`}
+            onClick={() => setIsPublic(v => !v)}
+            title={isPublic ? '所有人可见，点击改为私密' : '仅自己可见，点击改为公开'}
+          >
+            {isPublic ? '🌐 公开' : '🔒 私密'}
+          </button>
         </div>
       </div>
 

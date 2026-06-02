@@ -72,6 +72,12 @@
   color: var(--accent);
 }
 
+.article-card__private {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #9a6b00;
+}
+
 .article-card__tags {
   display: flex;
   gap: 5px;

@@ -46,6 +46,12 @@ export default function ArticleCard({ article, index }) {
               <span className="article-card__reading-time">{readingTime} min</span>
             </>
           )}
+          {article.is_public === false && (
+            <>
+              <span className="article-card__sep">·</span>
+              <span className="article-card__private">🔒 私密</span>
+            </>
+          )}
         </div>
         <h3 className="article-card__title">{article.title}</h3>
         {displaySummary && (

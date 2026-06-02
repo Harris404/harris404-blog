@@ -17,6 +17,12 @@ function estimateReadingTime(content) {
   return Math.max(1, Math.ceil(words / 200));
 }
 
+function formatViews(n) {
+  const v = Number(n) || 0;
+  if (v >= 1000) return `${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}k`;
+  return String(v);
+}
+
 export default function Article() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -195,6 +201,14 @@ export default function Article() {
               <span>{date}</span>
               <span className="article-meta__sep">·</span>
               <span>{readingTime} min read</span>
+              <span className="article-meta__sep">·</span>
+              <span>{formatViews(article.views)} views</span>
+              {article.is_public === false && (
+                <>
+                  <span className="article-meta__sep">·</span>
+                  <span className="article-private-badge">🔒 私密</span>
+                </>
+              )}
             </div>
             <h1 className="article-title">{article.title}</h1>
             {article.tags && (

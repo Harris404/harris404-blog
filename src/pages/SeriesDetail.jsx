@@ -10,8 +10,9 @@ const API_BASE = '/api/articles';
 export default function SeriesDetail() {
   const { seriesId } = useParams();
   const navigate = useNavigate();
-  const { articles, loading, refreshArticles } = useArticles();
+  const { articles, loading, refreshArticles, seriesMeta } = useArticles();
   const { isAdmin, token } = useAuth();
+  const meta = seriesMeta[seriesId] || {};
   const [saving, setSaving] = useState(false);
   const [showAddPanel, setShowAddPanel] = useState(false);
 
@@ -100,12 +101,12 @@ export default function SeriesDetail() {
       <nav className="series-breadcrumb">
         <Link to="/series">Series</Link>
         <span className="series-breadcrumb__sep">/</span>
-        <span className="series-breadcrumb__current">{seriesId}</span>
+        <span className="series-breadcrumb__current">{meta.name || seriesId}</span>
       </nav>
 
       <header className="series-detail-header">
         <div className="series-detail-header__info">
-          <h1 className="series-detail-header__title">📚 {seriesId}</h1>
+          <h1 className="series-detail-header__title">{meta.icon || '📚'} {meta.name || seriesId}</h1>
           <p className="series-detail-header__count">
             {seriesArticles.length} {seriesArticles.length === 1 ? 'note' : 'notes'}
             {saving && <span className="series-saving"> · Saving...</span>}
