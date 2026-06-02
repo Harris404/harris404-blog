@@ -1,8 +1,9 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import useArticles from '../hooks/useArticles';
 import { useAuth } from '../hooks/useAuth';
 import { cleanSummary } from '../utils/cleanSummary';
+import EmojiPicker from '../components/EmojiPicker';
 import './Series.css';
 
 const API_BASE = '/api/articles';
@@ -10,11 +11,34 @@ const API_BASE = '/api/articles';
 export default function SeriesDetail() {
   const { seriesId } = useParams();
   const navigate = useNavigate();
-  const { articles, loading, refreshArticles, seriesMeta } = useArticles();
+  const { articles, loading, refreshArticles, seriesMeta, updateSeries } = useArticles();
   const { isAdmin, token } = useAuth();
   const meta = seriesMeta[seriesId] || {};
   const [saving, setSaving] = useState(false);
   const [showAddPanel, setShowAddPanel] = useState(false);
+  const [showEditPanel, setShowEditPanel] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editIcon, setEditIcon] = useState('📚');
+  const [metaSaved, setMetaSaved] = useState(false);
+
+  // Seed edit fields from the series metadata once it loads.
+  useEffect(() => {
+    setEditName(meta.name || seriesId);
+    setEditIcon(meta.icon || '📚');
+  }, [meta.name, meta.icon, seriesId]);
+
+  const handleSaveMeta = async () => {
+    setSaving(true);
+    try {
+      await updateSeries(seriesId, { name: editName.trim() || seriesId, icon: editIcon || '📚' }, token);
+      setMetaSaved(true);
+      setTimeout(() => setMetaSaved(false), 2000);
+    } catch (err) {
+      console.error('Failed to save series meta:', err);
+      alert('保存失败：' + (err.message || ''));
+    }
+    setSaving(false);
+  };
 
   // Articles in this series
   const seriesArticles = articles
@@ -116,7 +140,13 @@ export default function SeriesDetail() {
           <div className="series-detail-header__actions">
             <button
               className="series-btn series-btn--secondary"
-              onClick={() => setShowAddPanel(!showAddPanel)}
+              onClick={() => { setShowEditPanel(v => !v); setShowAddPanel(false); }}
+            >
+              {showEditPanel ? 'Close' : '✏️ 改名/图标'}
+            </button>
+            <button
+              className="series-btn series-btn--secondary"
+              onClick={() => { setShowAddPanel(!showAddPanel); setShowEditPanel(false); }}
             >
               {showAddPanel ? 'Close' : '+ Add Notes'}
             </button>
@@ -126,6 +156,26 @@ export default function SeriesDetail() {
           </div>
         )}
       </header>
+
+      {/* Admin: edit name + icon */}
+      {isAdmin && showEditPanel && (
+        <div className="series-add-panel">
+          <h3 className="series-add-panel__title">编辑系列名称和图标</h3>
+          <div className="series-edit-row">
+            <input
+              className="series-edit-input"
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="系列显示名称"
+            />
+            <button className="series-btn series-btn--primary" onClick={handleSaveMeta} disabled={saving}>
+              {metaSaved ? '✓ 已保存' : '保存'}
+            </button>
+          </div>
+          <EmojiPicker value={editIcon} onChange={setEditIcon} />
+        </div>
+      )}
 
       {/* Admin: Add articles panel */}
       {isAdmin && showAddPanel && (

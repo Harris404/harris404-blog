@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { cleanSummary } from '../utils/cleanSummary';
+import useArticles from '../hooks/useArticles';
 import './ArticleCard.css';
 
 function formatViews(n) {
@@ -9,6 +10,8 @@ function formatViews(n) {
 }
 
 export default function ArticleCard({ article, index }) {
+  const { seriesMeta } = useArticles();
+  const seriesInfo = article.series_id ? (seriesMeta?.[article.series_id] || {}) : null;
   const date = new Date(article.date);
   const formattedDate = date.toLocaleDateString('en-US', {
     weekday: 'short',
@@ -43,7 +46,9 @@ export default function ArticleCard({ article, index }) {
           {article.series_id && (
             <>
               <span className="article-card__sep">·</span>
-              <span className="article-card__series">📚 Series</span>
+              <span className="article-card__series">
+                {seriesInfo?.icon || '📚'} {seriesInfo?.name || 'Series'}
+              </span>
             </>
           )}
           {readingTime && (

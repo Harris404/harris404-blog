@@ -288,6 +288,24 @@
   margin-bottom: 12px;
 }
 
+.series-edit-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.series-edit-input {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+.series-edit-input:focus { border-color: var(--accent); }
+
 .series-add-list {
   display: flex;
   flex-direction: column;
