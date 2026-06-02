@@ -142,7 +142,7 @@ export default function SeriesDetail() {
               className="series-btn series-btn--secondary"
               onClick={() => { setShowEditPanel(v => !v); setShowAddPanel(false); }}
             >
-              {showEditPanel ? 'Close' : '✏️ 改名/图标'}
+              {showEditPanel ? 'Close' : '✏️ Edit'}
             </button>
             <button
               className="series-btn series-btn--secondary"
@@ -160,17 +160,17 @@ export default function SeriesDetail() {
       {/* Admin: edit name + icon */}
       {isAdmin && showEditPanel && (
         <div className="series-add-panel">
-          <h3 className="series-add-panel__title">编辑系列名称和图标</h3>
+          <h3 className="series-add-panel__title">Edit name &amp; icon</h3>
           <div className="series-edit-row">
             <input
               className="series-edit-input"
               type="text"
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
-              placeholder="系列显示名称"
+              placeholder="Series name"
             />
             <button className="series-btn series-btn--primary" onClick={handleSaveMeta} disabled={saving}>
-              {metaSaved ? '✓ 已保存' : '保存'}
+              {metaSaved ? '✓ Saved' : 'Save'}
             </button>
           </div>
           <EmojiPicker value={editIcon} onChange={setEditIcon} />
