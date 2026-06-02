@@ -1,8 +1,9 @@
 // Shared authentication middleware for all API endpoints
-// Validates Bearer token on write operations (POST, PUT, DELETE)
+// Validates HMAC-signed Bearer token on write operations (POST, PUT, DELETE)
+
+import { verifyToken } from './_token.js';
 
 const WRITE_METHODS = ['POST', 'PUT', 'DELETE'];
-const TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // Paths that handle their own auth (e.g., login endpoint)
 const AUTH_EXEMPT_PATHS = ['/api/auth'];
@@ -42,24 +43,13 @@ export async function onRequest(context) {
     });
   }
 
-  try {
-    const token = authHeader.slice(7);
-    const decoded = atob(token);
-    const parts = decoded.split(':');
-
-    if (parts.length < 3 || parts[0] !== 'admin') {
-      throw new Error('Invalid token format');
-    }
-
-    const timestamp = Number(parts[1]);
-    if (isNaN(timestamp) || Date.now() - timestamp > TOKEN_TTL_MS) {
-      return new Response(JSON.stringify({ error: 'Token expired, please login again' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders() },
-      });
-    }
-  } catch (err) {
-    return new Response(JSON.stringify({ error: 'Invalid token' }), {
+  const token = authHeader.slice(7);
+  const result = await verifyToken(token, context.env);
+  if (!result.valid) {
+    const msg = result.reason === 'expired'
+      ? 'Token expired, please login again'
+      : 'Invalid token';
+    return new Response(JSON.stringify({ error: msg }), {
       status: 401,
       headers: { 'Content-Type': 'application/json', ...corsHeaders() },
     });

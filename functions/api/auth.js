@@ -1,6 +1,8 @@
 // Cloudflare Pages Function — POST /api/auth
 // Simple password-based admin authentication
 
+import { issueToken } from './_token.js';
+
 export async function onRequestPost(context) {
   const { env, request } = context;
 
@@ -28,8 +30,8 @@ export async function onRequestPost(context) {
       });
     }
 
-    // Generate a simple token (timestamp + hash-like)
-    const token = btoa(`admin:${Date.now()}:${crypto.randomUUID()}`);
+    // Generate an HMAC-signed token (cannot be forged without the secret)
+    const token = await issueToken(env);
 
     return new Response(JSON.stringify({ token }), { headers });
   } catch (err) {

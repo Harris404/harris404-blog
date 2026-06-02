@@ -185,6 +185,13 @@
   background: var(--accent-glow, rgba(99, 102, 241, 0.04));
 }
 
+/* Currently-visible section (scrollspy) */
+.toc__link--active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  font-weight: 600;
+}
+
 /* Indentation per heading level */
 .toc__link--h3 {
   padding-left: 22px;

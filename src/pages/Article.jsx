@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import ErrorBoundary from '../components/ErrorBoundary';
 import SeriesNav from '../components/SeriesNav';
@@ -11,34 +11,6 @@ import BackToTop from '../components/BackToTop';
 import useArticles from '../hooks/useArticles';
 import { useAuth } from '../hooks/useAuth';
 import './Article.css';
-
-function slugify(text) {
-  return text
-    .toLowerCase()
-    .replace(/\./g, '')           // strip dots (matches github-slugger)
-    .replace(/[^\p{L}\p{N}]+/gu, '-')
-    .replace(/(^-|-$)/g, '');
-}
-
-function extractHeadings(markdown) {
-  const headingRegex = /^(#{2,4})\s+(.+)$/gm;
-  const headings = [];
-  let match;
-  while ((match = headingRegex.exec(markdown)) !== null) {
-    // Strip markdown formatting from heading text
-    const text = match[2]
-      .replace(/\*\*(.+?)\*\*/g, '$1')  // bold
-      .replace(/\*(.+?)\*/g, '$1')      // italic
-      .replace(/`(.+?)`/g, '$1')        // code
-      .replace(/\[(.+?)\]\(.+?\)/g, '$1'); // links
-    headings.push({
-      level: match[1].length,
-      text,
-      id: slugify(text),
-    });
-  }
-  return headings;
-}
 
 function estimateReadingTime(content) {
   const words = content.split(/\s+/).length;
@@ -53,6 +25,8 @@ export default function Article() {
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [headings, setHeadings] = useState([]);
+  const [activeId, setActiveId] = useState('');
+  const contentRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,9 +35,6 @@ export default function Article() {
       const result = await getArticle(id);
       if (!cancelled) {
         setArticle(result);
-        if (result && result.content) {
-          setHeadings(extractHeadings(result.content));
-        }
         setLoading(false);
       }
     }
@@ -71,6 +42,53 @@ export default function Article() {
     window.scrollTo(0, 0);
     return () => { cancelled = true; };
   }, [id, getArticle]);
+
+  // Build the TOC from the ACTUAL rendered DOM headings, so every link's
+  // anchor matches the real rehype-slug id (handles CJK + duplicate headings
+  // that a regex slugifier would get wrong).
+  useEffect(() => {
+    if (!article || !contentRef.current) return;
+    const raf = requestAnimationFrame(() => {
+      const nodes = contentRef.current.querySelectorAll(
+        '.markdown-body h2[id], .markdown-body h3[id], .markdown-body h4[id]'
+      );
+      setHeadings([...nodes].map((n) => ({
+        id: n.id,
+        text: n.textContent.replace(/[¶#]\s*$/, '').trim(),
+        level: Number(n.tagName[1]),
+      })));
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [article]);
+
+  // Scrollspy — highlight the heading currently in view.
+  useEffect(() => {
+    if (headings.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const vis = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (vis[0]) setActiveId(vis[0].target.id);
+      },
+      { rootMargin: '-80px 0px -70% 0px', threshold: 0 }
+    );
+    headings.forEach((h) => {
+      const el = document.getElementById(h.id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [headings]);
+
+  const handleTocClick = (e, hid) => {
+    e.preventDefault();
+    const el = document.getElementById(hid);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      history.replaceState(null, '', `#${hid}`);
+      setActiveId(hid);
+    }
+  };
 
   const readingTime = useMemo(
     () => article ? estimateReadingTime(article.content) : 0,
@@ -167,7 +185,7 @@ export default function Article() {
       </div>
 
       <div className="article-layout">
-        <article className="article-content">
+        <article className="article-content" ref={contentRef}>
           <header className="article-header">
             <div className="article-meta">
               <span className={`article-category article-category--${article.category.toLowerCase()}`}>
@@ -222,7 +240,8 @@ export default function Article() {
                   <a
                     key={i}
                     href={`#${h.id}`}
-                    className={`toc__link toc__link--h${h.level}`}
+                    onClick={(e) => handleTocClick(e, h.id)}
+                    className={`toc__link toc__link--h${h.level}${activeId === h.id ? ' toc__link--active' : ''}`}
                     title={h.text}
                   >
                     {h.text}

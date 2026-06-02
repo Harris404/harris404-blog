@@ -7,7 +7,12 @@ const TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // must match functions/api/_middlewar
 
 function readTokenTimestamp(token) {
   try {
-    const decoded = atob(token);
+    // New format: base64url(payload).signature  — read payload before the dot.
+    // Legacy format: base64(payload) with no dot — still decodes fine here.
+    const head = token.split('.')[0];
+    const b = head.replace(/-/g, '+').replace(/_/g, '/');
+    const pad = b.length % 4 ? '='.repeat(4 - (b.length % 4)) : '';
+    const decoded = decodeURIComponent(escape(atob(b + pad)));
     const parts = decoded.split(':');
     if (parts.length < 3 || parts[0] !== 'admin') return null;
     const ts = Number(parts[1]);
