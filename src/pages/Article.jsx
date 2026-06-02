@@ -8,6 +8,7 @@ import PaperMap from '../components/PaperMap';
 import RelatedArticles from '../components/RelatedArticles';
 import ReadingProgress from '../components/ReadingProgress';
 import BackToTop from '../components/BackToTop';
+import Comments from '../components/Comments';
 import useArticles from '../hooks/useArticles';
 import { useAuth } from '../hooks/useAuth';
 import './Article.css';
@@ -247,6 +248,9 @@ export default function Article() {
 
           {/* Related articles — shows at bottom */}
           <RelatedArticles articles={article.related_articles} />
+
+          {/* GitHub Discussions comments (remount per article) */}
+          <Comments key={article.id} />
         </article>
 
         {headings.length > 2 && (
