@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import MarkdownRenderer from '../components/MarkdownRenderer';
+import EmojiPicker from '../components/EmojiPicker';
 import useArticles from '../hooks/useArticles';
 import { useAuth } from '../hooks/useAuth';
 import './Write.css';
@@ -554,25 +555,16 @@ export default function Write() {
 
           {/* Name + icon input */}
           <div className="sc-section">
-            <label className="sc-label">Series Name &amp; Icon</label>
-            <div className="sc-name-row">
-              <input
-                className="sc-input sc-input--icon"
-                type="text"
-                placeholder="📚"
-                maxLength={4}
-                value={newSeriesIcon}
-                onChange={(e) => setNewSeriesIcon(e.target.value)}
-                title="Emoji 图标"
-              />
-              <input
-                className="sc-input"
-                type="text"
-                placeholder="e.g. Transformer 系列"
-                value={newSeriesName}
-                onChange={(e) => setNewSeriesName(e.target.value)}
-              />
-            </div>
+            <label className="sc-label">Series Name</label>
+            <input
+              className="sc-input"
+              type="text"
+              placeholder="e.g. Transformer 系列"
+              value={newSeriesName}
+              onChange={(e) => setNewSeriesName(e.target.value)}
+            />
+            <label className="sc-label" style={{ marginTop: 12 }}>图标</label>
+            <EmojiPicker value={newSeriesIcon} onChange={setNewSeriesIcon} />
           </div>
 
           {/* Selected articles (ordered) */}

@@ -436,8 +436,6 @@
   transition: border-color var(--transition-fast);
 }
 .sc-input:focus { border-color: var(--accent); }
-.sc-name-row { display: flex; gap: 8px; }
-.sc-input--icon { width: 64px; flex-shrink: 0; text-align: center; }
 
 .sc-empty {
   font-size: 0.85rem; color: var(--text-muted); padding: 16px;

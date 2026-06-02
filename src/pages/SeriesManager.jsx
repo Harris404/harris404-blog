@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useArticles from '../hooks/useArticles';
 import { useAuth } from '../hooks/useAuth';
+import EmojiPicker from '../components/EmojiPicker';
 import './SeriesManager.css';
 
 const API_BASE = '/api/articles';
@@ -263,25 +264,19 @@ export default function SeriesManager() {
 
             {/* Rename + icon */}
             <div className="sm-meta-edit">
-              <input
-                className="sm-input sm-input--icon"
-                type="text"
-                maxLength={4}
-                value={editIcon}
-                onChange={(e) => setEditIcon(e.target.value)}
-                placeholder="📚"
-                title="Emoji 图标"
-              />
-              <input
-                className="sm-input"
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                placeholder="系列显示名称"
-              />
-              <button className="sm-btn sm-btn--primary" onClick={handleSaveMeta} disabled={saving}>
-                {metaSaved ? '✓ 已保存' : '保存名称/图标'}
-              </button>
+              <div className="sm-meta-edit__row">
+                <input
+                  className="sm-input"
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="系列显示名称"
+                />
+                <button className="sm-btn sm-btn--primary" onClick={handleSaveMeta} disabled={saving}>
+                  {metaSaved ? '✓ 已保存' : '保存名称/图标'}
+                </button>
+              </div>
+              <EmojiPicker value={editIcon} onChange={setEditIcon} />
             </div>
 
             {seriesArticles.length === 0 ? (
