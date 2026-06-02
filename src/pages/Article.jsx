@@ -3,7 +3,6 @@ import { Helmet } from 'react-helmet-async';
 import { useMemo, useState, useEffect, useRef } from 'react';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import ErrorBoundary from '../components/ErrorBoundary';
-import SeriesNav from '../components/SeriesNav';
 import PaperMap from '../components/PaperMap';
 import RelatedArticles from '../components/RelatedArticles';
 import ReadingProgress from '../components/ReadingProgress';
@@ -223,23 +222,15 @@ export default function Article() {
             )}
           </header>
 
-          {/* Series navigation / Paper Map */}
+          {/* Series roadmap — same on every note, current one highlighted */}
           {article.series_id && article.series_articles && (
-            (article.series_order === 0 || article.series_order === null)
-              ? <PaperMap
-                  seriesArticles={article.series_articles}
-                  currentId={article.id}
-                  seriesId={article.series_id}
-                  seriesName={seriesMeta[article.series_id]?.name}
-                  seriesIcon={seriesMeta[article.series_id]?.icon}
-                />
-              : <SeriesNav
-                  seriesArticles={article.series_articles}
-                  currentId={article.id}
-                  seriesId={article.series_id}
-                  seriesName={seriesMeta[article.series_id]?.name}
-                  seriesIcon={seriesMeta[article.series_id]?.icon}
-                />
+            <PaperMap
+              seriesArticles={article.series_articles}
+              currentId={article.id}
+              seriesId={article.series_id}
+              seriesName={seriesMeta[article.series_id]?.name}
+              seriesIcon={seriesMeta[article.series_id]?.icon}
+            />
           )}
 
           <ErrorBoundary>

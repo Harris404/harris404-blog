@@ -37,9 +37,9 @@ export default function PaperMap({ seriesArticles, currentId, seriesId, seriesNa
     }
   }, [currentId]);
 
-  const sorted = [...seriesArticles].sort((a, b) => (a.series_order || 0) - (b.series_order || 0));
-  const hub = sorted[0]; // series_order = 0 is the hub
-  const chapters = sorted.slice(1);
+  // Show every note in the series as a numbered step (no special "hub"), and
+  // highlight whichever one is currently open — consistent on every page.
+  const chapters = [...seriesArticles].sort((a, b) => (a.series_order || 0) - (b.series_order || 0));
   const completedCount = chapters.filter(a => readIds.includes(a.id)).length;
   const progress = chapters.length > 0 ? Math.round((completedCount / chapters.length) * 100) : 0;
 

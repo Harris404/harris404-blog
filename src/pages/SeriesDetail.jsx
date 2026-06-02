@@ -267,27 +267,23 @@ export default function SeriesDetail() {
                 </div>
               </Link>
               {isAdmin && (
-                <div className="series-note__admin">
-                  <div className="series-note__reorder">
-                    <button
-                      className="series-note__move"
-                      onClick={() => moveInSeries(idx, -1)}
-                      title="上移"
-                      disabled={saving || idx === 0}
-                    >
-                      ↑
-                    </button>
-                    <button
-                      className="series-note__move"
-                      onClick={() => moveInSeries(idx, 1)}
-                      title="下移"
-                      disabled={saving || idx === seriesArticles.length - 1}
-                    >
-                      ↓
-                    </button>
-                  </div>
+                <div className="series-note__actions">
                   <button
-                    className="series-note__remove"
+                    onClick={() => moveInSeries(idx, -1)}
+                    title="上移"
+                    disabled={saving || idx === 0}
+                  >
+                    ↑
+                  </button>
+                  <button
+                    onClick={() => moveInSeries(idx, 1)}
+                    title="下移"
+                    disabled={saving || idx === seriesArticles.length - 1}
+                  >
+                    ↓
+                  </button>
+                  <button
+                    className="series-note__remove-x"
                     onClick={() => removeFromSeries(article.id)}
                     title="Remove from series"
                     disabled={saving}
