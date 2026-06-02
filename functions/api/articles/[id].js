@@ -2,6 +2,7 @@
 // GET single article, PUT update, DELETE remove
 
 import { verifyToken } from '../_token.js';
+import { normalizeMarkdown } from '../_normalize.js';
 
 async function isAdmin(request, env) {
   const auth = request.headers.get('Authorization') || '';
@@ -323,7 +324,7 @@ export async function onRequestPut(context) {
       setClauses.push('tags = ?'); bindValues.push(JSON.stringify(normalized));
     }
     if (summary !== undefined) { setClauses.push('summary = ?'); bindValues.push(summary); }
-    if (content !== undefined) { setClauses.push('content = ?'); bindValues.push(content); }
+    if (content !== undefined) { setClauses.push('content = ?'); bindValues.push(normalizeMarkdown(content)); }
     if (related_ids !== undefined) { setClauses.push('related_ids = ?'); bindValues.push(JSON.stringify(related_ids)); }
 
     // series_id and series_order can be explicitly set to null (to clear them)

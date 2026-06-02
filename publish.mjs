@@ -3,6 +3,7 @@
 // Or:   node publish.mjs < article.md
 import { execSync } from 'child_process';
 import { writeFileSync, unlinkSync } from 'fs';
+import { normalizeMarkdown } from './functions/api/_normalize.js';
 
 let content = '';
 const chunks = [];
@@ -11,7 +12,8 @@ process.stdin.on('data', d => chunks.push(d));
 process.stdin.on('end', () => {
   content = chunks.join('');
   if (!content.trim()) { console.error('No content provided'); process.exit(1); }
-  
+
+  content = normalizeMarkdown(content); // auto-fix the </div>$$ + multi-line $$ pitfalls
   const escaped = content.replace(/'/g, "''");
   const id = 'infs7450-week-3-node-measures-i';
   const title = 'INFS7450 Week 3 — Node Measures (I)';

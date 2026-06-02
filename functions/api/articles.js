@@ -2,6 +2,7 @@
 // Lists all articles or a single article by ID
 
 import { verifyToken } from './_token.js';
+import { normalizeMarkdown } from './_normalize.js';
 
 // True only when the request carries a valid admin token.
 async function isAdmin(request, env) {
@@ -117,10 +118,11 @@ export async function onRequestPost(context) {
     const tagsJson = JSON.stringify(normalizeTags(tags || []));
     const relatedJson = JSON.stringify(related_ids || []);
     const pub = is_public === false ? 0 : 1; // default public
+    const safeContent = normalizeMarkdown(content); // auto-fix render pitfalls
 
     await env.DB.prepare(
       'INSERT INTO articles (id, title, date, category, tags, summary, content, series_id, series_order, related_ids, is_public) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-    ).bind(id, title, date, category || 'Knowledge', tagsJson, summary || '', content, series_id || null, series_order ?? null, relatedJson, pub).run();
+    ).bind(id, title, date, category || 'Knowledge', tagsJson, summary || '', safeContent, series_id || null, series_order ?? null, relatedJson, pub).run();
 
     return new Response(JSON.stringify({ id, title, date, category, tags, is_public: pub === 1 }), {
       status: 201,
