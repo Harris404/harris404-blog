@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect, useRef } from 'react';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import ErrorBoundary from '../components/ErrorBoundary';
 import PaperMap from '../components/PaperMap';
+import SeriesNav from '../components/SeriesNav';
 import RelatedArticles from '../components/RelatedArticles';
 import ReadingProgress from '../components/ReadingProgress';
 import BackToTop from '../components/BackToTop';
@@ -222,15 +223,23 @@ export default function Article() {
             )}
           </header>
 
-          {/* Series roadmap — same on every note, current one highlighted */}
+          {/* Series navigation / Paper Map */}
           {article.series_id && article.series_articles && (
-            <PaperMap
-              seriesArticles={article.series_articles}
-              currentId={article.id}
-              seriesId={article.series_id}
-              seriesName={seriesMeta[article.series_id]?.name}
-              seriesIcon={seriesMeta[article.series_id]?.icon}
-            />
+            (article.series_order === 0 || article.series_order === null)
+              ? <PaperMap
+                  seriesArticles={article.series_articles}
+                  currentId={article.id}
+                  seriesId={article.series_id}
+                  seriesName={seriesMeta[article.series_id]?.name}
+                  seriesIcon={seriesMeta[article.series_id]?.icon}
+                />
+              : <SeriesNav
+                  seriesArticles={article.series_articles}
+                  currentId={article.id}
+                  seriesId={article.series_id}
+                  seriesName={seriesMeta[article.series_id]?.name}
+                  seriesIcon={seriesMeta[article.series_id]?.icon}
+                />
           )}
 
           <ErrorBoundary>
