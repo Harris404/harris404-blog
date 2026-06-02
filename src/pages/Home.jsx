@@ -106,8 +106,9 @@ export default function Home() {
               key={tag}
               className={`home__tag ${activeTag === tag ? 'home__tag--active' : ''}`}
               onClick={() => selectTag(tag)}
+              title={`${count} 篇`}
             >
-              #{tag}<span className="home__tag-count">{count}</span>
+              #{tag}
             </button>
           ))}
           {hiddenCount > 0 && (

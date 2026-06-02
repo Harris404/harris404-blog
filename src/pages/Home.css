@@ -89,14 +89,6 @@
   background: transparent;
 }
 
-.home__tag-count {
-  margin-left: 5px;
-  font-size: 0.66rem;
-  opacity: 0.6;
-  font-weight: 600;
-}
-.home__tag--active .home__tag-count { opacity: 0.85; }
-
 .home__tag--toggle {
   color: var(--text-muted);
   border-color: var(--border-color);
