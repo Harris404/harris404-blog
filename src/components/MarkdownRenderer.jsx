@@ -9,6 +9,7 @@ import rehypeSlug from 'rehype-slug';
 import InteractiveWidget from './InteractiveWidget';
 import ArchitectureExplorer from './ArchitectureExplorer';
 import MermaidBlock from './MermaidBlock';
+import DiffusionDemo from './DiffusionDemo';
 import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/atom-one-dark.css';
 import './MarkdownRenderer.css';
@@ -18,7 +19,7 @@ const remarkPluginsArray = [remarkGfm, remarkMath];
 const rehypePluginsArray = [
   rehypeRaw,
   rehypeKatex,
-  [rehypeHighlight, { plainText: ['interactive', 'mermaid', 'architecture'] }],
+  [rehypeHighlight, { plainText: ['interactive', 'mermaid', 'architecture', 'diffusion'] }],
   rehypeSlug,
 ];
 
@@ -216,6 +217,14 @@ export default function MarkdownRenderer({ content, editable = false, onContentC
             // Architecture explorer
             if (className.includes('language-architecture')) {
               return <ArchitectureExplorer />;
+            }
+
+            // Influence-diffusion step demo (LTM / ICM)
+            if (className.includes('language-diffusion')) {
+              const code = typeof child.props.children === 'string'
+                ? child.props.children
+                : String(child.props.children || '');
+              return <DiffusionDemo config={code.trim()} />;
             }
 
             return (
