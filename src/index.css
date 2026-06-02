@@ -320,10 +320,21 @@ h4 { font-size: 1.1rem; }
   background: var(--code-bg) !important;
 }
 
-/* --- Inline SVG in markdown --- */
-.markdown-body svg {
+/* --- Inline SVG in markdown ---
+   Scope figure styling to our injected diagram blocks ONLY.
+   A bare `.markdown-body svg` rule also hits KaTeX's internal radical
+   surd SVGs (display:block + margin collapses the √ so roots vanish). */
+.markdown-body .md-svg-block svg {
   max-width: 100%;
   height: auto;
   display: block;
   margin: 1.5em auto;
+}
+
+/* Guard: never let figure rules leak into KaTeX-rendered math. KaTeX's
+   radical/delimiter surds use tiny inline SVGs whose display/size KaTeX
+   controls itself — only neutralize the harmful spacing + max-width. */
+.markdown-body .katex svg {
+  max-width: none;
+  margin: 0;
 }
