@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
 import ArticleCard from '../components/ArticleCard';
@@ -7,18 +7,40 @@ import useArticles from '../hooks/useArticles';
 import './Home.css';
 
 const categories = ['All', 'Knowledge', 'Paper', 'Code'];
+const TAG_LIMIT = 12; // collapse beyond this many tags
 
 export default function Home() {
   const { articles, getGroupedByYear } = useArticles();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeCategory, setActiveCategory] = useState('All');
+  const [showAllTags, setShowAllTags] = useState(false);
 
   const activeTag = searchParams.get('tag') || null;
 
-  // Get all unique tags from articles
-  const allTags = [...new Set(
-    articles.flatMap(a => Array.isArray(a.tags) ? a.tags : [])
-  )].sort();
+  // Tags ranked by how many articles use them (most-used first), so the
+  // useful tags stay on top and the long tail collapses behind a toggle.
+  const rankedTags = useMemo(() => {
+    const counts = {};
+    articles.forEach(a => (Array.isArray(a.tags) ? a.tags : []).forEach(t => {
+      counts[t] = (counts[t] || 0) + 1;
+    }));
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([tag, count]) => ({ tag, count }));
+  }, [articles]);
+
+  // Always keep the active tag visible even if it's in the collapsed tail.
+  const visibleTags = useMemo(() => {
+    if (showAllTags) return rankedTags;
+    const top = rankedTags.slice(0, TAG_LIMIT);
+    if (activeTag && !top.some(t => t.tag.toLowerCase() === activeTag.toLowerCase())) {
+      const extra = rankedTags.find(t => t.tag.toLowerCase() === activeTag.toLowerCase());
+      if (extra) top.push(extra);
+    }
+    return top;
+  }, [rankedTags, showAllTags, activeTag]);
+
+  const hiddenCount = rankedTags.length - Math.min(TAG_LIMIT, rankedTags.length);
 
   // Filter: category first, then tag
   let groupedArticles = getGroupedByYear(activeCategory);
@@ -71,23 +93,31 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Tag filter chips */}
-      {allTags.length > 0 && (
+      {/* Tag filter chips — ranked by usage, collapsed beyond TAG_LIMIT */}
+      {rankedTags.length > 0 && (
         <div className="home__tags">
           {activeTag && (
             <button className="home__tag home__tag--clear" onClick={clearTag}>
               ✕ Clear
             </button>
           )}
-          {allTags.map(tag => (
+          {visibleTags.map(({ tag, count }) => (
             <button
               key={tag}
               className={`home__tag ${activeTag === tag ? 'home__tag--active' : ''}`}
               onClick={() => selectTag(tag)}
             >
-              #{tag}
+              #{tag}<span className="home__tag-count">{count}</span>
             </button>
           ))}
+          {hiddenCount > 0 && (
+            <button
+              className="home__tag home__tag--toggle"
+              onClick={() => setShowAllTags(v => !v)}
+            >
+              {showAllTags ? '收起 ▲' : `+${hiddenCount} 更多 ▼`}
+            </button>
+          )}
         </div>
       )}
 

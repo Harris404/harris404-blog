@@ -2,6 +2,12 @@ import { Link } from 'react-router-dom';
 import { cleanSummary } from '../utils/cleanSummary';
 import './ArticleCard.css';
 
+function formatViews(n) {
+  const v = Number(n) || 0;
+  if (v >= 1000) return `${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}k`;
+  return String(v);
+}
+
 export default function ArticleCard({ article, index }) {
   const date = new Date(article.date);
   const formattedDate = date.toLocaleDateString('en-US', {
@@ -44,6 +50,18 @@ export default function ArticleCard({ article, index }) {
             <>
               <span className="article-card__sep">·</span>
               <span className="article-card__reading-time">{readingTime} min</span>
+            </>
+          )}
+          {article.views !== undefined && (
+            <>
+              <span className="article-card__sep">·</span>
+              <span className="article-card__views" title="浏览量">
+                <svg className="article-card__eye" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                {formatViews(article.views)}
+              </span>
             </>
           )}
           {article.is_public === false && (

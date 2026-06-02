@@ -78,6 +78,16 @@
   color: #9a6b00;
 }
 
+.article-card__views {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.article-card__eye {
+  opacity: 0.7;
+  transform: translateY(0.5px);
+}
+
 .article-card__tags {
   display: flex;
   gap: 5px;
