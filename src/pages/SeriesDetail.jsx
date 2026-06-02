@@ -68,6 +68,29 @@ export default function SeriesDetail() {
     setSaving(false);
   }, [token, refreshArticles]);
 
+  // Move a note up/down by swapping its series_order with the neighbour.
+  const moveInSeries = useCallback(async (idx, dir) => {
+    const target = idx + dir;
+    if (target < 0 || target >= seriesArticles.length) return;
+    const a = seriesArticles[idx];
+    const b = seriesArticles[target];
+    const aOrder = a.series_order ?? idx;
+    const bOrder = b.series_order ?? target;
+    setSaving(true);
+    try {
+      const put = (id, order) => fetch(`${API_BASE}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ series_order: order }),
+      });
+      await Promise.all([put(a.id, bOrder), put(b.id, aOrder)]);
+      if (refreshArticles) refreshArticles();
+    } catch (err) {
+      console.error('Failed to reorder series:', err);
+    }
+    setSaving(false);
+  }, [seriesArticles, token, refreshArticles]);
+
   // Add article to series
   const addToSeries = useCallback(async (articleId) => {
     const order = seriesArticles.length;
@@ -244,14 +267,34 @@ export default function SeriesDetail() {
                 </div>
               </Link>
               {isAdmin && (
-                <button
-                  className="series-note__remove"
-                  onClick={() => removeFromSeries(article.id)}
-                  title="Remove from series"
-                  disabled={saving}
-                >
-                  ✕
-                </button>
+                <div className="series-note__admin">
+                  <div className="series-note__reorder">
+                    <button
+                      className="series-note__move"
+                      onClick={() => moveInSeries(idx, -1)}
+                      title="上移"
+                      disabled={saving || idx === 0}
+                    >
+                      ↑
+                    </button>
+                    <button
+                      className="series-note__move"
+                      onClick={() => moveInSeries(idx, 1)}
+                      title="下移"
+                      disabled={saving || idx === seriesArticles.length - 1}
+                    >
+                      ↓
+                    </button>
+                  </div>
+                  <button
+                    className="series-note__remove"
+                    onClick={() => removeFromSeries(article.id)}
+                    title="Remove from series"
+                    disabled={saving}
+                  >
+                    ✕
+                  </button>
+                </div>
               )}
             </div>
           ))}
